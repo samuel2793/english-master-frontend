@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule }    from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -12,6 +11,10 @@ import { DomSanitizer }     from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatCardModule }       from '@angular/material/card';
+import { MatFormFieldModule }  from '@angular/material/form-field';
+import { MatInputModule }      from '@angular/material/input';
 
 @NgModule({
   declarations: [
@@ -26,7 +29,11 @@ import { RegisterComponent } from './auth/register/register.component';
     MatButtonModule,
     MatIconModule,
     MatToolbarModule,
-    HttpClientModule
+    HttpClientModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
