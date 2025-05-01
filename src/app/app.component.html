@@ -6,12 +6,14 @@
     src="assets/logo/logo.png"
   />
   <span class="toolbar-title">Bienvenido a English Master</span>
-</mat-toolbar>
+  <span class="spacer"></span> <!-- empuja los botones a la derecha -->
 
-<div class="content" role="main">
-  <button mat-raised-button color="accent">
-    Botón de prueba con Angular Material
+  <button mat-button routerLink="/login" routerLinkActive="active">
+    Iniciar sesión
   </button>
-</div>
+  <button mat-raised-button color="accent" routerLink="/register" routerLinkActive="active">
+    Registrarse
+  </button>
+</mat-toolbar>
 
 <router-outlet></router-outlet>

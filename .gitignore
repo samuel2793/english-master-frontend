@@ -43,3 +43,7 @@ Thumbs.db
 
 # vscode
 .vscode
+
+# Other
+contenido_total.txt
+exportar.sh
