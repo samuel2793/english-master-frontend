@@ -6,6 +6,12 @@
     src="assets/logo/logo.png"
   />
   <span class="toolbar-title">Bienvenido a English Master</span>
+  <mat-chip-set class="toolbar-chip-list" aria-label="Nivel de estudio">
+    <mat-chip color="accent" selected>
+      <mat-icon matChipAvatar>school</mat-icon>
+      {{ level }}
+    </mat-chip>
+  </mat-chip-set>
   <span class="spacer"></span> <!-- empuja los botones a la derecha -->
 
   <button mat-button routerLink="/login" routerLinkActive="active">

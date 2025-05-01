@@ -15,6 +15,9 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule }       from '@angular/material/card';
 import { MatFormFieldModule }  from '@angular/material/form-field';
 import { MatInputModule }      from '@angular/material/input';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 
 @NgModule({
   declarations: [
@@ -34,6 +37,8 @@ import { MatInputModule }      from '@angular/material/input';
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
+    MatChipsModule,
+    MatTooltipModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
