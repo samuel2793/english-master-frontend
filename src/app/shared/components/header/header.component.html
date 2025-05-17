@@ -1,0 +1,31 @@
+<mat-toolbar color="primary" class="app-toolbar">
+  <img
+    matTooltip="Angular Logo"
+    width="40"
+    alt="Angular Logo"
+    src="assets/logo/logo.png"
+  />
+  <span class="toolbar-title">Bienvenido a English Master</span>
+  <mat-chip-set class="toolbar-chip-list" aria-label="Nivel de estudio">
+    <mat-chip color="accent" selected [matMenuTriggerFor]="levelMenu">
+      <mat-icon matChipAvatar>school</mat-icon>
+      {{ level }}
+      <mat-icon>arrow_drop_down</mat-icon>
+    </mat-chip>
+  </mat-chip-set>
+  <span class="spacer"></span> <!-- empuja los botones a la derecha -->
+
+  <button mat-button routerLink="/login" routerLinkActive="active">
+    Iniciar sesión
+  </button>
+  <button mat-raised-button color="accent" routerLink="/register" routerLinkActive="active">
+    Registrarse
+  </button>
+</mat-toolbar>
+
+<!-- Dropdown menu para los niveles -->
+<mat-menu #levelMenu="matMenu">
+  <button mat-menu-item *ngFor="let availableLevel of levelsAvaliable" (click)="setLevel(availableLevel)">
+    {{ availableLevel }}
+  </button>
+</mat-menu>
