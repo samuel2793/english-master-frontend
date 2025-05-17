@@ -37,3 +37,100 @@
     vertical-align: middle;
   }
 }
+
+/* Separación entre botones */
+.app-toolbar button[mat-button] {
+  margin-right: 16px;
+}
+
+/* Separación del último botón con el borde */
+.app-toolbar button[mat-raised-button] {
+  margin-right: 16px;
+}
+
+/* Adaptación para dispositivos móviles */
+@media (max-width: 768px) {
+  .toolbar-title {
+    display: none;
+  }
+
+  .app-toolbar {
+    height: 56px;
+    padding: 0 8px;
+  }
+
+  .content {
+    margin-top: 70px;
+  }
+
+  .toolbar-chip-list {
+    margin-left: 8px;
+  }
+
+  /* Hacer los botones más compactos */
+  .app-toolbar button[mat-button],
+  .app-toolbar button[mat-raised-button] {
+    min-width: 0;
+    padding: 0 8px;
+    font-size: 14px;
+  }
+
+  /* Ajustar espaciado para móviles */
+  .app-toolbar button[mat-button] {
+    margin-right: 12px;
+  }
+
+  .app-toolbar button[mat-raised-button] {
+    margin-right: 12px;
+  }
+
+  /* Reducir tamaño del logo */
+  .app-toolbar img {
+    width: 32px;
+  }
+}
+
+/* Adaptación para móviles muy pequeños */
+@media (max-width: 480px) {
+  .app-toolbar {
+    padding: 0 4px;
+  }
+
+  /* Ajustar tamaño de chips */
+  .toolbar-chip-list .mat-mdc-chip {
+    font-size: 12px;
+    height: 36px;
+  }
+
+  /* Ocultar texto en botones y mostrar solo icono */
+  .mobile-hidden-text {
+    display: none;
+  }
+
+  /* Centrar iconos en botones */
+  .app-toolbar button[mat-button],
+  .app-toolbar button[mat-raised-button] {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    line-height: 36px;
+    min-width: 36px;
+  }
+
+  /* Ajustar espaciado para móviles pequeños */
+  .app-toolbar button[mat-button] {
+    margin-right: 8px;
+  }
+
+  .app-toolbar button[mat-raised-button] {
+    margin-right: 8px;
+  }
+
+  .app-toolbar button[mat-button] mat-icon,
+  .app-toolbar button[mat-raised-button] mat-icon {
+    margin: 0;
+  }
+}
