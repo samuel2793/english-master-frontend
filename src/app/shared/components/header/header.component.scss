@@ -33,11 +33,7 @@
 
 .toolbar-chip-list {
   margin-left: 16px;
-
-  mat-chip {
-    height: 32px;
-    font-size: 14px;
-    font-weight: 500;
-    text-transform: uppercase;
+  mat-icon {
+    vertical-align: middle;
   }
 }
