@@ -6,13 +6,18 @@
     src="assets/logo/logo.png"
   />
   <span class="toolbar-title">Bienvenido a English Master</span>
-  <mat-chip-set class="toolbar-chip-list" aria-label="Nivel de estudio">
-    <mat-chip color="accent" selected [matMenuTriggerFor]="levelMenu">
-      <mat-icon matChipAvatar>school</mat-icon>
-      {{ level }}
-      <mat-icon>arrow_drop_down</mat-icon>
-    </mat-chip>
-  </mat-chip-set>
+
+  <!-- Chip de nivel solo visible para usuarios autenticados -->
+  <ng-container *ngIf="isLoggedIn">
+    <mat-chip-set class="toolbar-chip-list" aria-label="Nivel de estudio">
+      <mat-chip color="accent" selected [matMenuTriggerFor]="levelMenu">
+        <mat-icon matChipAvatar>school</mat-icon>
+        {{ level }}
+        <mat-icon>arrow_drop_down</mat-icon>
+      </mat-chip>
+    </mat-chip-set>
+  </ng-container>
+
   <span class="spacer"></span> <!-- empuja los botones a la derecha -->
 
   <!-- Botones para usuarios no autenticados -->
