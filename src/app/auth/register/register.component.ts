@@ -19,11 +19,11 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit(): void {
     this.registerForm = this.fb.group({
-      name:     ['', [Validators.required, Validators.minLength(2)]],
-      email:    ['', [Validators.required, Validators.email]],
+      name: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      confirm:  ['', [Validators.required]]
-    }, { validators: this.passwordsMatch });
+      confirm: ['', [Validators.required, this.matchPassword.bind(this)]]
+    });
   }
 
   private passwordsMatch(group: AbstractControl) {
@@ -32,9 +32,18 @@ export class RegisterComponent implements OnInit {
     return pass === conf ? null : { notMatching: true };
   }
 
+  private matchPassword(control: AbstractControl): {[key: string]: boolean} | null {
+    if (!this.registerForm) return null;
+    const password = this.registerForm.get('password')?.value;
+    const confirmPassword = control.value;
+
+    return password === confirmPassword ? null : { notMatching: true };
+  }
+
   onSubmit(): void {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
+      console.log('Formulario inválido');
       return;
     }
     const { name, email, password } = this.registerForm.value;
