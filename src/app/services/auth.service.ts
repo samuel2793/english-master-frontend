@@ -9,6 +9,11 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
 export interface AuthResponse {
   jwt: string;
 }
@@ -27,6 +32,25 @@ export class AuthService {
       .pipe(
         catchError(this.handleError)
       );
+  }
+
+  // Método para iniciar sesión
+  login(loginData: LoginRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.API_URL}/login`, loginData)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  // Método para cerrar sesión
+  logout(token: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/logout`, {}, {
+      headers: {
+        'Authorization': token
+      }
+    }).pipe(
+      catchError(this.handleError)
+    );
   }
 
   // Método para manejar errores de HTTP
