@@ -2,3 +2,22 @@
 
 // html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+// Estilos globales para el snackbar(toast)
+.mat-mdc-snack-bar-container.success-snackbar .mdc-snackbar__surface {
+  background-color: #4caf50;
+}
+
+.mat-mdc-snack-bar-container.success-snackbar .mat-mdc-snack-bar-label,
+.mat-mdc-snack-bar-container.success-snackbar .mat-mdc-snack-bar-actions {
+  color: white;
+}
+
+.mat-mdc-snack-bar-container.error-snackbar .mdc-snackbar__surface {
+  background-color: #f44336;
+}
+
+.mat-mdc-snack-bar-container.error-snackbar .mat-mdc-snack-bar-label,
+.mat-mdc-snack-bar-container.error-snackbar .mat-mdc-snack-bar-actions {
+  color: white;
+}

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService, RegisterRequest } from '../../services/auth.service';
 
 @Component({
@@ -17,7 +18,8 @@ export class RegisterComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -27,12 +29,6 @@ export class RegisterComponent implements OnInit {
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirm: ['', [Validators.required, this.matchPassword.bind(this)]]
     });
-  }
-
-  private passwordsMatch(group: AbstractControl) {
-    const pass = group.get('password')?.value;
-    const conf = group.get('confirm')?.value;
-    return pass === conf ? null : { notMatching: true };
   }
 
   private matchPassword(control: AbstractControl): {[key: string]: boolean} | null {
@@ -61,15 +57,28 @@ export class RegisterComponent implements OnInit {
     this.authService.register(registerData).subscribe({
       next: (response) => {
         console.log('Registro exitoso', response);
-        // Guardar el token JWT si es necesario
-        // localStorage.setItem('token', response.jwt);
+        // Mostrar toast de éxito
+        this.snackBar.open('¡Registro completado con éxito!', 'Cerrar', {
+          duration: 5000,
+          panelClass: ['success-snackbar'],
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom'
+        });
 
         // Redirigir al login
         this.router.navigate(['/login']);
       },
       error: (err) => {
         console.error('Error en el registro', err);
-        this.error = err.message || 'Error al registrar el usuario';
+        this.error = err.error.message || 'Error al registrar el usuario';
+
+        // Mostrar toast de error
+        this.snackBar.open(this.error!, 'Cerrar', {
+          duration: 7000,
+          panelClass: ['error-snackbar'],
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom'
+        });
       }
     });
   }

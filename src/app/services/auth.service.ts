@@ -31,17 +31,10 @@ export class AuthService {
 
   // Método para manejar errores de HTTP
   private handleError(error: HttpErrorResponse) {
-    let errorMessage = 'Ocurrió un error desconocido';
+    // Se registra el error en la consola
+    console.error('Error HTTP:', error);
 
-    if (error.error instanceof ErrorEvent) {
-      // Error del lado del cliente
-      errorMessage = `Error: ${error.error.message}`;
-    } else {
-      // Error del lado del servidor
-      errorMessage = `Código de error: ${error.status}, mensaje: ${error.error?.message || error.message}`;
-    }
-
-    console.error(errorMessage);
-    return throwError(() => new Error(errorMessage));
+    // Se devuelve el error original para mantener la estructura
+    return throwError(() => error);
   }
 }
