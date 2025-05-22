@@ -48,6 +48,18 @@
   margin-right: 16px;
 }
 
+/* Estilos para el nombre de usuario */
+.user-name {
+  display: flex;
+  align-items: center;
+  margin-right: 16px;
+  font-weight: 500;
+
+  mat-icon {
+    margin-right: 8px;
+  }
+}
+
 /* Adaptación para dispositivos móviles */
 @media (max-width: 768px) {
   .toolbar-title {
@@ -132,5 +144,24 @@
   .app-toolbar button[mat-button] mat-icon,
   .app-toolbar button[mat-raised-button] mat-icon {
     margin: 0;
+  }
+}
+
+/* Estilos para el nombre de usuario en dispositivos móviles */
+@media (max-width: 768px) {
+  .user-name {
+    margin-right: 12px;
+    font-size: 14px;
+
+    mat-icon {
+      margin-right: 4px;
+    }
+  }
+
+  /* Para pantallas muy pequeñas, ocultar el texto del nombre */
+  @media (max-width: 480px) {
+    .user-name span {
+      display: none;
+    }
   }
 }

@@ -1,19 +1,60 @@
-import { Component } from '@angular/core';
-import { EnglishLevelService } from '../../../services/english-level.service';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { AuthService, User } from '../../../services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
-export class HeaderComponent {
-  level = this.englishLevelService.getCurrentLevel();
-  levelsAvaliable = this.englishLevelService.getAvailableLevels();
+export class HeaderComponent implements OnInit, OnDestroy {
+  level: string = 'A1'; // Valor por defecto
+  levelsAvaliable: string[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
-  constructor(private englishLevelService: EnglishLevelService) { }
+  // Propiedades para controlar la autenticación
+  isLoggedIn: boolean = false;
+  currentUser: User | null = null;
+  private authSubscription: Subscription | null = null;
 
-  setLevel(level: string) {
-    this.englishLevelService.setUserLevel(level as any);
-    this.level = this.englishLevelService.getCurrentLevel();
+  constructor(
+    private authService: AuthService
+  ) {}
+
+  ngOnInit(): void {
+    // Subscribirse a los cambios en el estado de autenticación
+    this.authSubscription = this.authService.currentUser$.subscribe(user => {
+      this.isLoggedIn = !!user;
+      this.currentUser = user;
+    });
+  }
+
+  ngOnDestroy(): void {
+    // Limpiar la subscripción cuando el componente se destruya
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
+  }
+
+  // Método para cambiar el nivel
+  setLevel(level: string): void {
+    this.level = level;
+  }
+
+  // Método para mostrar el nombre de usuario
+  getUserDisplayName(): string {
+    if (!this.currentUser) return 'Usuario';
+
+    // Si el username es igual al email, extraer solo la parte antes del @
+    if (this.currentUser.username && this.currentUser.email &&
+        this.currentUser.username === this.currentUser.email) {
+      return this.currentUser.email.split('@')[0];
+    }
+
+    return this.currentUser.username || this.currentUser.email?.split('@')[0] || 'Usuario';
+  }
+
+  // Método para cerrar sesión
+  logout(): void {
+    this.authService.logout();
   }
 }

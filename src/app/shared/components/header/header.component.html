@@ -15,14 +15,29 @@
   </mat-chip-set>
   <span class="spacer"></span> <!-- empuja los botones a la derecha -->
 
-  <button mat-button routerLink="/login" routerLinkActive="active">
-    <mat-icon>login</mat-icon>
-    <span class="mobile-hidden-text">Iniciar sesión</span>
-  </button>
-  <button mat-raised-button color="accent" routerLink="/register" routerLinkActive="active">
-    <mat-icon>person_add</mat-icon>
-    <span class="mobile-hidden-text">Registrarse</span>
-  </button>
+  <!-- Botones para usuarios no autenticados -->
+  <ng-container *ngIf="!isLoggedIn">
+    <button mat-button routerLink="/login" routerLinkActive="active">
+      <mat-icon>login</mat-icon>
+      <span class="mobile-hidden-text">Iniciar sesión</span>
+    </button>
+    <button mat-raised-button color="accent" routerLink="/register" routerLinkActive="active">
+      <mat-icon>person_add</mat-icon>
+      <span class="mobile-hidden-text">Registrarse</span>
+    </button>
+  </ng-container>
+
+  <!-- Botones para usuarios autenticados -->
+  <ng-container *ngIf="isLoggedIn">
+    <span class="user-name">
+      <mat-icon>person</mat-icon>
+      {{ getUserDisplayName() }}
+    </span>
+    <button mat-raised-button color="warn" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span class="mobile-hidden-text">Cerrar sesión</span>
+    </button>
+  </ng-container>
 </mat-toolbar>
 
 <!-- Dropdown menu para los niveles -->
