@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { AuthService, LoginRequest } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -10,10 +12,13 @@ import { Router } from '@angular/router';
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   hidePassword = true;
+  error: string | null = null;
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private authService: AuthService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -28,10 +33,51 @@ export class LoginComponent implements OnInit {
       this.loginForm.markAllAsTouched();
       return;
     }
+
     const { email, password } = this.loginForm.value;
-    // Aquí iría la llamada al servicio de autenticación… (cuando suba el backend)
-    console.log('Login con', email, password);
-    // Si el login tiene éxito, redirigir, por ejemplo:
-    this.router.navigate(['/']);
+
+    const loginData: LoginRequest = {
+      email,
+      password
+    };
+
+    this.authService.login(loginData).subscribe({
+      next: (response) => {
+        console.log('Login exitoso', response);
+
+        // Almacenar token JWT de momento en localStorage pero quiero en un futuro usar una sesión
+        // o un servicio de almacenamiento seguro
+        localStorage.setItem('auth_token', response.jwt);
+
+        // Mostrar toast de éxito
+        this.snackBar.open('¡Inicio de sesión exitoso!', 'Cerrar', {
+          duration: 5000,
+          panelClass: ['success-snackbar'],
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom'
+        });
+
+        // Redirigir a la página principal
+        this.router.navigate(['/']);
+      },
+      error: (err) => {
+        console.error('Error en el login', err);
+
+        // Verificar si el error recibido es un array
+        if (Array.isArray(err.error) && err.error.length > 0) {
+          this.error = err.error[0].message || 'Error al iniciar sesión';
+        } else {
+          this.error = err.error?.message || 'Error al iniciar sesión';
+        }
+
+        // Mostrar toast de error
+        this.snackBar.open(this.error!, 'Cerrar', {
+          duration: 7000,
+          panelClass: ['error-snackbar'],
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom'
+        });
+      }
+    });
   }
 }
