@@ -2,31 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, catchError, tap, throwError } from 'rxjs';
 import { Router } from '@angular/router';
-
-// Interfaces para request y response
-export interface RegisterRequest {
-  username: string;
-  email: string;
-  password: string;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  jwt: string;
-  email: string;
-  username: string;
-}
-
-// Interfaz para el usuario autenticado
-export interface User {
-  token: string;
-  email?: string;
-  username?: string;
-}
+import { RegisterRequest, LoginRequest, AuthResponse, User } from '../interfaces/auth.interfaces';
 
 @Injectable({
   providedIn: 'root',
