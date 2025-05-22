@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService, RegisterRequest } from '../../services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -11,10 +12,12 @@ export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
   hidePassword = true;
   hideConfirm  = true;
+  error: string | null = null;
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -46,10 +49,28 @@ export class RegisterComponent implements OnInit {
       console.log('Formulario inválido');
       return;
     }
+
     const { name, email, password } = this.registerForm.value;
-    // Lógica de registro con el servicio de autenticación… (cuando suba el backend)
-    console.log('Registro con', name, email, password);
-    // Tras registro, redirigir, por ejemplo:
-    this.router.navigate(['/login']);
+
+    const registerData: RegisterRequest = {
+      username: name,
+      email,
+      password
+    };
+
+    this.authService.register(registerData).subscribe({
+      next: (response) => {
+        console.log('Registro exitoso', response);
+        // Guardar el token JWT si es necesario
+        // localStorage.setItem('token', response.jwt);
+
+        // Redirigir al login
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        console.error('Error en el registro', err);
+        this.error = err.message || 'Error al registrar el usuario';
+      }
+    });
   }
 }

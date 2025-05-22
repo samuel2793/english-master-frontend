@@ -64,6 +64,10 @@
             Registrarse
           </button>
         </div>
+
+        <mat-error *ngIf="error" class="server-error">
+          {{ error }}
+        </mat-error>
       </form>
     </mat-card-content>
     <mat-card-actions>
