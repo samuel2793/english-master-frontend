@@ -1,0 +1,11 @@
+.content-container {
+  margin-top: 64px; /* Altura del header */
+  padding: 16px;
+}
+
+/* Ajustes para dispositivos móviles */
+@media (max-width: 768px) {
+  .content-container {
+    margin-top: 56px; /* Altura reducida del header en móviles */
+  }
+}
