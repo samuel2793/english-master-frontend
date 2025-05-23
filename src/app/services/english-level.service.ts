@@ -1,32 +1,75 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, map, tap, of } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { EnglishLevelResponse } from '../interfaces/english-level.interfaces';
 
-export type EnglishLevel = 'B1' | 'B2' | 'C1' | 'C2';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class EnglishLevelService {
-  // Lista de niveles disponibles
-  private availableLevels: EnglishLevel[] = ['B1', 'B2', 'C1', 'C2'];
+  private readonly API_URL = 'http://localhost:8080/api/english-levels';
+  private readonly TOKEN_KEY = 'auth_token'; // La misma clave que usa AuthService
 
-  // Nivel actual del usuario (con valor por defecto C1)
-  private currentLevel = new BehaviorSubject<EnglishLevel>('C1');
+  // Lista de niveles disponibles (se cargará desde la API)
+  private availableLevels: string[] = [];
 
-  constructor() { }
+  // Nivel actual del usuario (con valor por defecto C1, en un futuro debe ser cargado desde los datos del usuario)
+  private currentLevel = new BehaviorSubject<string>('C1');
+  public currentLevel$ = this.currentLevel.asObservable();
+
+  constructor(private http: HttpClient) {
+    // Cargar niveles al inicio
+    this.loadAvailableLevels().subscribe();
+  }
+
+  // Obtener todos los niveles disponibles desde la API
+  loadAvailableLevels(): Observable<string[]> {
+    // Obtener el token del localStorage
+    const token = localStorage.getItem(this.TOKEN_KEY);
+
+    if (!token) {
+      return of([]);
+    }
+
+    // Crear los headers con el token
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    return this.http
+      .get<EnglishLevelResponse[]>(this.API_URL, { headers })
+      .pipe(
+        map((response) => response.map((level) => level.code)),
+        tap((levels) => {
+          this.availableLevels = levels;
+
+          // Si el nivel actual no está en la lista, establecer el primero
+          if (
+            levels.length > 0 &&
+            !levels.includes(this.currentLevel.getValue())
+          ) {
+            this.currentLevel.next(levels[0]);
+          }
+        })
+      );
+  }
 
   // Obtener todos los niveles disponibles
-  getAvailableLevels(): EnglishLevel[] {
-    return [...this.availableLevels];
+  getAvailableLevels(): Observable<string[]> {
+    if (this.availableLevels.length === 0) {
+      return this.loadAvailableLevels();
+    }
+    return of([...this.availableLevels]);
   }
 
   // Obtener el nivel actual del usuario como string
-  getCurrentLevel(): EnglishLevel {
+  getCurrentLevel(): string {
     return this.currentLevel.getValue();
   }
 
   // Establecer el nivel del usuario
-  setUserLevel(level: EnglishLevel): void {
+  setUserLevel(level: string): void {
     if (this.availableLevels.includes(level)) {
       this.currentLevel.next(level);
     }
