@@ -21,6 +21,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { HeaderComponent } from './shared/components/header/header.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { HomeComponent } from './home/home.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @NgModule({
   declarations: [
@@ -45,7 +46,8 @@ import { HomeComponent } from './home/home.component';
     MatChipsModule,
     MatTooltipModule,
     MatMenuModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

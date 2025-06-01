@@ -1,8 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, catchError, tap, throwError } from 'rxjs';
 import { Router } from '@angular/router';
-import { RegisterRequest, LoginRequest, AuthResponse, User } from '../interfaces/auth.interfaces';
+import {
+  RegisterRequest,
+  LoginRequest,
+  AuthResponse,
+  User,
+} from '../interfaces/auth.interfaces';
+import { EnglishLevelService } from './english-level.service';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +22,7 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) {
+  constructor(private http: HttpClient, private router: Router, private injector: Injector) {
     // Verificar si hay un token guardado al iniciar la app
     this.checkUserSession();
   }
@@ -87,6 +93,12 @@ export class AuthService {
             username: response.username || response.email, // Si no hay username, usar email
           };
           this.currentUserSubject.next(user);
+
+          // Cargar el nivel de inglés del usuario autenticado
+          this.injector
+            .get(EnglishLevelService)
+            .loadUserEnglishLevel()
+            .subscribe();
         }),
         catchError(this.handleError)
       );

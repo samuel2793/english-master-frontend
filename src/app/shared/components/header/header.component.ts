@@ -33,6 +33,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
       // Cargar niveles cuando el usuario está autenticado
       if (this.isLoggedIn) {
         this.loadLevels();
+        // Cargar el nivel de inglés del usuario actual
+        this.englishLevelService.loadUserEnglishLevel().subscribe();
       }
     });
 

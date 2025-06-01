@@ -10,15 +10,26 @@
   <!-- Chip de nivel solo visible para usuarios autenticados -->
   <ng-container *ngIf="isLoggedIn">
     <mat-chip-set class="toolbar-chip-list" aria-label="Nivel de estudio">
-      <mat-chip color="accent" selected [matMenuTriggerFor]="levelMenu">
+      <mat-chip
+        color="accent"
+        selected
+        [matMenuTriggerFor]="levelMenu"
+        *ngIf="level"
+      >
         <mat-icon matChipAvatar>school</mat-icon>
         {{ level }}
         <mat-icon>arrow_drop_down</mat-icon>
       </mat-chip>
+      <!-- Spinner mientras se carga el nivel (queda un poco cutre, habría que revisarlo)-->
+      <mat-chip color="accent" *ngIf="!level">
+        <mat-spinner diameter="20"></mat-spinner>
+        Cargando nivel...
+      </mat-chip>
     </mat-chip-set>
   </ng-container>
 
-  <span class="spacer"></span> <!-- empuja los botones a la derecha -->
+  <span class="spacer"></span>
+  <!-- empuja los botones a la derecha -->
 
   <!-- Botones para usuarios no autenticados -->
   <ng-container *ngIf="!isLoggedIn">
@@ -26,7 +37,12 @@
       <mat-icon>login</mat-icon>
       <span class="mobile-hidden-text">Iniciar sesión</span>
     </button>
-    <button mat-raised-button color="accent" routerLink="/register" routerLinkActive="active">
+    <button
+      mat-raised-button
+      color="accent"
+      routerLink="/register"
+      routerLinkActive="active"
+    >
       <mat-icon>person_add</mat-icon>
       <span class="mobile-hidden-text">Registrarse</span>
     </button>
@@ -47,7 +63,11 @@
 
 <!-- Dropdown menu para los niveles -->
 <mat-menu #levelMenu="matMenu">
-  <button mat-menu-item *ngFor="let availableLevel of levelsAvaliable" (click)="setLevel(availableLevel)">
+  <button
+    mat-menu-item
+    *ngFor="let availableLevel of levelsAvaliable"
+    (click)="setLevel(availableLevel)"
+  >
     {{ availableLevel }}
   </button>
 </mat-menu>
