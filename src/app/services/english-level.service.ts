@@ -121,7 +121,41 @@ export class EnglishLevelService {
   // Establecer el nivel del usuario
   setUserLevel(level: string): void {
     if (this.availableLevels.includes(level)) {
-      this.currentLevel.next(level);
+      // Obtener el token para autorizar la petición
+      const token = localStorage.getItem(this.TOKEN_KEY);
+
+      if (!token) {
+        console.error(
+          'No se puede establecer el nivel: usuario no autenticado'
+        );
+        return;
+      }
+
+      // Crear los headers con el token
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`,
+      });
+
+      // URL para establecer el nivel de inglés
+      const url = `http://localhost:8080/api/users/me/english-level/${level}`;
+
+      // Realizar la petición PUT al endpoint
+      this.http.put<any>(url, {}, { headers }).subscribe({
+        next: () => {
+          // Actualizamos el nivel localmente después de la respuesta exitosa
+          this.currentLevel.next(level);
+          console.log(`Nivel de inglés establecido a: ${level}`);
+        },
+        error: (error) => {
+          console.error('Error al establecer nivel de inglés:', error);
+        },
+      });
+    } else {
+      console.error(
+        `Nivel "${level}" no válido, debe ser uno de: ${this.availableLevels.join(
+          ', '
+        )}`
+      );
     }
   }
 }
