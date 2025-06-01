@@ -1,1 +1,53 @@
-<p>home works!</p>
+<div class="skill-container">
+  <h1 class="main-title">Mejora tu inglés</h1>
+  <p class="subtitle">Selecciona una habilidad para practicar:</p>
+
+  <div class="skills-grid">
+    <mat-card class="skill-card" (click)="navigateTo('reading')">
+      <mat-card-header>
+        <mat-icon color="primary" mat-card-avatar>menu_book</mat-icon>
+        <mat-card-title>Reading</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Mejora tu comprensión lectora con textos adaptados a tu nivel.</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="skill-card" (click)="navigateTo('writing')">
+      <mat-card-header>
+        <mat-icon color="primary" mat-card-avatar>edit</mat-icon>
+        <mat-card-title>Writing</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>
+          Practica tu escritura con ejercicios y correcciones personalizadas.
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="skill-card" (click)="navigateTo('listening')">
+      <mat-card-header>
+        <mat-icon color="primary" mat-card-avatar>headphones</mat-icon>
+        <mat-card-title>Listening</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>
+          Entrena tu oído con audios adaptados a diferentes acentos y
+          velocidades.
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="skill-card" (click)="navigateTo('speaking')">
+      <mat-card-header>
+        <mat-icon color="primary" mat-card-avatar>record_voice_over</mat-icon>
+        <mat-card-title>Speaking</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>
+          Mejora tu fluidez oral con ejercicios interactivos de pronunciación.
+        </p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
