@@ -1,53 +1,38 @@
 <div class="skill-container">
   <h1 class="main-title">Mejora tu inglés</h1>
+  <p class="subtitle" *ngIf="userLevel">Nivel actual: <strong>{{ userLevel }}</strong></p>
   <p class="subtitle">Selecciona una habilidad para practicar:</p>
 
-  <div class="skills-grid">
-    <mat-card class="skill-card" (click)="navigateTo('reading')">
-      <mat-card-header>
-        <mat-icon color="primary" mat-card-avatar>menu_book</mat-icon>
-        <mat-card-title>Reading</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>Mejora tu comprensión lectora con textos adaptados a tu nivel.</p>
-      </mat-card-content>
-    </mat-card>
+  <!-- Spinner de carga -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando ejercicios...</p>
+  </div>
 
-    <mat-card class="skill-card" (click)="navigateTo('writing')">
+  <!-- Grid de categorías -->
+  <div class="skills-grid" *ngIf="!loading && categories.length > 0">
+    <mat-card class="skill-card" *ngFor="let category of categories">
       <mat-card-header>
-        <mat-icon color="primary" mat-card-avatar>edit</mat-icon>
-        <mat-card-title>Writing</mat-card-title>
+        <mat-icon color="primary" mat-card-avatar>{{ getCategoryIcon(category.code) }}</mat-icon>
+        <mat-card-title>{{ category.name }}</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <p>
-          Practica tu escritura con ejercicios y correcciones personalizadas.
-        </p>
+        <p>Tipos de ejercicios disponibles:</p>
+        <mat-chip-set aria-label="Tipos de ejercicios">
+          <mat-chip
+            *ngFor="let type of category.types"
+            (click)="navigateTo(category.code, type.code)"
+            class="exercise-type-chip">
+            {{ type.name }}
+          </mat-chip>
+        </mat-chip-set>
       </mat-card-content>
     </mat-card>
+  </div>
 
-    <mat-card class="skill-card" (click)="navigateTo('listening')">
-      <mat-card-header>
-        <mat-icon color="primary" mat-card-avatar>headphones</mat-icon>
-        <mat-card-title>Listening</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>
-          Entrena tu oído con audios adaptados a diferentes acentos y
-          velocidades.
-        </p>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="skill-card" (click)="navigateTo('speaking')">
-      <mat-card-header>
-        <mat-icon color="primary" mat-card-avatar>record_voice_over</mat-icon>
-        <mat-card-title>Speaking</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>
-          Mejora tu fluidez oral con ejercicios interactivos de pronunciación.
-        </p>
-      </mat-card-content>
-    </mat-card>
+  <!-- Mensaje si no hay ejercicios -->
+  <div class="no-exercises" *ngIf="!loading && categories.length === 0">
+    <mat-icon color="warn">warning</mat-icon>
+    <p>No hay ejercicios disponibles para tu nivel actual.</p>
   </div>
 </div>

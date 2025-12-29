@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, map, tap, of, catchError } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { EnglishLevelResponse } from '../interfaces/english-level.interfaces';
+import { ExerciseCatalogResponse } from '../interfaces/exercise-catalog.interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -10,14 +11,19 @@ export class EnglishLevelService {
   private readonly API_URL = 'http://localhost:8080/api/english-levels';
   private readonly USER_LEVEL_API_URL =
     'http://localhost:8080/api/users/me/english-level';
-  private readonly TOKEN_KEY = 'auth_token'; // La misma clave que usa AuthService
+  private readonly TOKEN_KEY = 'auth_token';
 
   // Lista de niveles disponibles (se cargará desde la API)
   private availableLevels: string[] = [];
+  private availableLevelsData: EnglishLevelResponse[] = []; // Guardamos la data completa
 
   // Nivel actual del usuario
   private currentLevel = new BehaviorSubject<string>('');
   public currentLevel$ = this.currentLevel.asObservable();
+
+  // Nuevo: ID del nivel actual
+  private currentLevelId = new BehaviorSubject<number | null>(null);
+  public currentLevelId$ = this.currentLevelId.asObservable();
 
   constructor(private http: HttpClient) {
     // Al iniciar, intentamos cargar el nivel del usuario si está autenticado
@@ -44,13 +50,28 @@ export class EnglishLevelService {
     return this.http
       .get<EnglishLevelResponse[]>(this.API_URL, { headers })
       .pipe(
-        map((response) => response.map((level) => level.code)),
+        map((response) => {
+          // Guardar la respuesta completa
+          this.availableLevelsData = response;
+
+          // Guardar la respuesta completa para poder acceder a los IDs
+          const currentCode = this.currentLevel.getValue();
+          const currentLevelData = response.find((l) => l.code === currentCode);
+          if (currentLevelData) {
+            this.currentLevelId.next(currentLevelData.id);
+          }
+          return response.map((level) => level.code);
+        }),
         tap((levels) => {
           this.availableLevels = levels;
 
           // Si el nivel actual está vacío y tenemos niveles disponibles, establecer el primero
           if (!this.currentLevel.getValue() && levels.length > 0) {
             this.currentLevel.next(levels[0]);
+            // También establecer el ID del primer nivel
+            if (this.availableLevelsData.length > 0) {
+              this.currentLevelId.next(this.availableLevelsData[0].id);
+            }
           }
         }),
         catchError((error) => {
@@ -81,6 +102,8 @@ export class EnglishLevelService {
       map((response) => {
         // Adaptamos para aceptar diferentes formatos de respuesta posibles
         let level = '';
+        let levelId = null;
+
         if (typeof response === 'string') {
           level = response;
         } else if (response && response.level) {
@@ -90,6 +113,13 @@ export class EnglishLevelService {
         } else if (response && response.code) {
           level = response.code;
         }
+
+        // Intentar obtener el ID también
+        if (response && response.id) {
+          levelId = response.id;
+          this.currentLevelId.next(levelId);
+        }
+
         return level;
       }),
       tap((level) => {
@@ -131,6 +161,14 @@ export class EnglishLevelService {
         return;
       }
 
+      // NUEVO: Buscar el levelData ANTES de hacer la petición
+      const levelData = this.availableLevelsData.find((l) => l.code === level);
+
+      if (!levelData) {
+        console.error(`No se encontró el nivel ${level} en los datos disponibles`);
+        return;
+      }
+
       // Crear los headers con el token
       const headers = new HttpHeaders({
         Authorization: `Bearer ${token}`,
@@ -142,9 +180,13 @@ export class EnglishLevelService {
       // Realizar la petición PUT al endpoint
       this.http.put<any>(url, {}, { headers }).subscribe({
         next: () => {
-          // Actualizamos el nivel localmente después de la respuesta exitosa
+          // IMPORTANTE: Actualizar primero el ID, luego el código
+          // Esto asegura que cuando el componente reaccione al cambio del código,
+          // el ID ya esté actualizado
+          this.currentLevelId.next(levelData.id);
           this.currentLevel.next(level);
-          console.log(`Nivel de inglés establecido a: ${level}`);
+
+          console.log(`Nivel de inglés establecido a: ${level} (ID: ${levelData.id})`);
         },
         error: (error) => {
           console.error('Error al establecer nivel de inglés:', error);
@@ -157,5 +199,35 @@ export class EnglishLevelService {
         )}`
       );
     }
+  }
+
+  // Nuevo: Obtener catálogo de ejercicios por nivel
+  getExerciseCatalog(levelId: number): Observable<ExerciseCatalogResponse> {
+    const token = localStorage.getItem(this.TOKEN_KEY);
+
+    if (!token) {
+      return of({} as ExerciseCatalogResponse);
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    return this.http
+      .get<ExerciseCatalogResponse>(
+        `${this.API_URL}/${levelId}/exercise-catalog`,
+        { headers }
+      )
+      .pipe(
+        catchError((error) => {
+          console.error('Error al cargar catálogo de ejercicios:', error);
+          return of({} as ExerciseCatalogResponse);
+        })
+      );
+  }
+
+  // Obtener el ID del nivel actual
+  getCurrentLevelId(): number | null {
+    return this.currentLevelId.getValue();
   }
 }
