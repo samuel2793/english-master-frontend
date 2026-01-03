@@ -9,7 +9,7 @@
         <mat-card-title>Reading</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <p>Mejora tu comprensión lectora con textos adaptados a tu nivel.</p>
+        <p>Improve your reading comprehension with texts adapted to your level.</p>
       </mat-card-content>
     </mat-card>
 
@@ -20,7 +20,7 @@
       </mat-card-header>
       <mat-card-content>
         <p>
-          Practica tu escritura con ejercicios y correcciones personalizadas.
+          Practice your writing skills with exercises and personalized feedback.
         </p>
       </mat-card-content>
     </mat-card>
@@ -32,8 +32,7 @@
       </mat-card-header>
       <mat-card-content>
         <p>
-          Entrena tu oído con audios adaptados a diferentes acentos y
-          velocidades.
+          Train your ear with audio content adapted to different accents and speeds.
         </p>
       </mat-card-content>
     </mat-card>
@@ -45,7 +44,31 @@
       </mat-card-header>
       <mat-card-content>
         <p>
-          Mejora tu fluidez oral con ejercicios interactivos de pronunciación.
+          Improve your fluency with interactive pronunciation exercises.
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="skill-card" (click)="navigateTo('grammar')">
+      <mat-card-header>
+        <mat-icon color="primary" mat-card-avatar>school</mat-icon>
+        <mat-card-title>Grammar Tests</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>
+          Test your grammar knowledge with comprehensive exercises.
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="skill-card" (click)="navigateTo('use-of-english')">
+      <mat-card-header>
+        <mat-icon color="primary" mat-card-avatar>quiz</mat-icon>
+        <mat-card-title>Use of English</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>
+          Master vocabulary and advanced language structures.
         </p>
       </mat-card-content>
     </mat-card>
