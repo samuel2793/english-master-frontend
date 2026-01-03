@@ -139,6 +139,12 @@ export class ExerciseViewerComponent implements OnInit {
     return Array.isArray(value);
   }
 
+  // Helper para formatear texto con saltos de línea
+  formatTextWithBreaks(text: string): string {
+    if (!text) return '';
+    return text.replace(/\\n\\n/g, '\n\n').replace(/\\n/g, '\n');
+  }
+
   // Seleccionar respuesta para una pregunta
   selectAnswer(questionKey: string, answer: string): void {
     this.userAnswers[questionKey] = answer;

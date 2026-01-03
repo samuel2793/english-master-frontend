@@ -143,11 +143,53 @@
 
       <!-- Texto único (para otros tipos) -->
       <div *ngIf="exercise.payload.text && !exercise.payload.texts" class="main-text">
-        <p [innerHTML]="exercise.payload.text"></p>
+        <p class="text-content" style="white-space: pre-line;">{{ formatTextWithBreaks(exercise.payload.text) }}</p>
+      </div>
+
+      <!-- Preguntas compactas (Long Text con compact_questions y compact_answers) -->
+      <div *ngIf="exercise.payload.compact_questions && exercise.payload.compact_answers" class="questions-section">
+        <h3>Questions</h3>
+        <div *ngFor="let key of getObjectKeys(exercise.payload.compact_questions)" class="question-item">
+          <p class="question">
+            <strong>{{ key }}.</strong> {{ exercise.payload.compact_questions[key] }}
+          </p>
+
+          <!-- Selector de respuesta interactivo con opciones múltiples -->
+          <div class="answer-selector vertical">
+            <button
+              *ngFor="let choice of exercise.payload.compact_answers[key]; let i = index"
+              mat-stroked-button
+              [color]="userAnswers[key] === choice ? 'primary' : ''"
+              [class.selected]="userAnswers[key] === choice && !showResults"
+              [class.correct]="showResults && userAnswers[key] === choice && isCorrectAnswer(key, exercise.payload.compact_solutions)"
+              [class.incorrect]="showResults && userAnswers[key] === choice && !isCorrectAnswer(key, exercise.payload.compact_solutions)"
+              [disabled]="showResults"
+              (click)="selectAnswer(key, choice)"
+            >
+              <span class="choice-label">{{ getChoiceLabel(i) }}.</span>
+              <span class="choice-text">{{ choice }}</span>
+            </button>
+          </div>
+
+          <!-- Mostrar respuesta correcta si está mal -->
+          <div *ngIf="showResults && !isCorrectAnswer(key, exercise.payload.compact_solutions) && exercise.payload.compact_solutions && exercise.payload.compact_solutions[key]" class="correct-answer">
+            <mat-icon>info</mat-icon>
+            <span>Correct answer: {{ exercise.payload.compact_solutions[key] }}</span>
+          </div>
+        </div>
+
+        <!-- Resultados -->
+        <div *ngIf="showResults && exercise.payload.compact_solutions" class="results-summary">
+          <mat-icon>{{ getCorrectCount(exercise.payload.compact_solutions) === getObjectKeys(exercise.payload.compact_questions).length ? 'check_circle' : 'pending' }}</mat-icon>
+          <p>
+            You got <strong>{{ getCorrectCount(exercise.payload.compact_solutions) }}</strong> out of
+            <strong>{{ getObjectKeys(exercise.payload.compact_questions).length }}</strong> correct!
+          </p>
+        </div>
       </div>
 
       <!-- Preguntas (formato objeto con keys numéricas, ej: Cross Matching) -->
-      <div *ngIf="exercise.payload.questions && !isArray(exercise.payload.questions)" class="questions-section">
+      <div *ngIf="exercise.payload.questions && !isArray(exercise.payload.questions) && !exercise.payload.compact_questions" class="questions-section">
         <h3>Questions</h3>
         <div *ngFor="let key of getObjectKeys(exercise.payload.questions)" class="question-item">
           <p class="question">
@@ -197,23 +239,6 @@
         </div>
       </div>
 
-      <!-- Preguntas (formato array, ej: otros ejercicios) -->
-      <div *ngIf="exercise.payload.questions && isArray(exercise.payload.questions) && exercise.payload.questions.length > 0" class="questions-section">
-        <h3>Questions</h3>
-        <div *ngFor="let q of exercise.payload.questions; let i = index" class="question-item">
-          <p class="question"><strong>{{ i + 1 }}.</strong> {{ q.question || q }}</p>
-          <div *ngIf="q.options" class="options">
-            <div *ngFor="let opt of q.options" class="option">
-              {{ opt }}
-            </div>
-          </div>
-          <div *ngIf="showAnswers && q.answer" class="answer">
-            <mat-icon>check_circle</mat-icon>
-            <span>Answer: {{ q.answer }}</span>
-          </div>
-        </div>
-      </div>
-
       <!-- Fallback: mostrar JSON crudo si no encaja en ningún patrón -->
       <details class="raw-data">
         <summary>View Raw Data</summary>
@@ -223,9 +248,21 @@
 
     <!-- Controles globales -->
     <div class="exercise-controls">
-      <!-- Botón para verificar respuestas (ejercicios interactivos) -->
+      <!-- Botón para verificar respuestas (ejercicios interactivos con compact_questions) -->
       <button
-        *ngIf="exercise.payload.questions && !isArray(exercise.payload.questions) && exercise.payload.solutions && !showResults"
+        *ngIf="exercise.payload.compact_questions && exercise.payload.compact_solutions && !showResults"
+        mat-raised-button
+        color="primary"
+        (click)="checkAnswers()"
+        [disabled]="getObjectKeys(userAnswers).length === 0"
+      >
+        <mat-icon>check</mat-icon>
+        Check Answers
+      </button>
+
+      <!-- Botón para verificar respuestas (ejercicios interactivos Cross Matching) -->
+      <button
+        *ngIf="exercise.payload.questions && !isArray(exercise.payload.questions) && !exercise.payload.compact_questions && exercise.payload.solutions && !showResults"
         mat-raised-button
         color="primary"
         (click)="checkAnswers()"
@@ -246,12 +283,12 @@
         Try Again
       </button>
 
-      <!-- Botón para mostrar/ocultar respuestas (otros tipos) -->
+      <!-- Botón para mostrar/ocultar respuestas (Grammar Tests) -->
       <button
         mat-raised-button
         color="primary"
         (click)="toggleAnswers()"
-        *ngIf="(isGrammarTest() || (exercise.payload.questions && isArray(exercise.payload.questions) && exercise.payload.questions.length > 0)) && !showResults"
+        *ngIf="isGrammarTest() && !showResults"
       >
         <mat-icon>{{ showAnswers ? 'visibility_off' : 'visibility' }}</mat-icon>
         {{ showAnswers ? 'Hide Answers' : 'Show Answers' }}
