@@ -142,8 +142,70 @@
       </div>
 
       <!-- Texto único (para otros tipos) -->
-      <div *ngIf="exercise.payload.text && !exercise.payload.texts" class="main-text">
+      <div *ngIf="exercise.payload.text && !exercise.payload.texts && !exercise.payload.text.includes('[]')" class="main-text">
         <p class="text-content" style="white-space: pre-line;">{{ formatTextWithBreaks(exercise.payload.text) }}</p>
+      </div>
+
+      <!-- Missing Paragraphs (texto con [] y choices) -->
+      <div *ngIf="exercise.payload.text && exercise.payload.text.includes('[]') && exercise.payload.choices" class="missing-paragraphs">
+        <!-- Texto continuo con gaps inline -->
+        <div class="continuous-text">
+          <ng-container *ngFor="let segment of getTextSegments(exercise.payload.text)">
+            <span *ngIf="segment.type === 'text'" class="text-part">{{ segment.content }} </span>
+            <span
+              *ngIf="segment.type === 'gap'"
+              class="inline-gap"
+              [class.filled]="userAnswers[segment.index]"
+              [class.selected]="selectedGap === segment.index"
+              [class.correct]="showResults && checkGapAnswer(segment.index, exercise)"
+              [class.incorrect]="showResults && userAnswers[segment.index] && !checkGapAnswer(segment.index, exercise)"
+              (click)="!showResults && selectGap(segment.index)"
+            >
+              <span class="gap-bracket">[</span>
+              <span class="gap-number">{{ segment.index }}</span>
+              <span *ngIf="userAnswers[segment.index]" class="gap-answer">: {{ userAnswers[segment.index].toUpperCase() }}</span>
+              <span class="gap-bracket">]</span>
+            </span>
+          </ng-container>
+        </div>
+
+        <!-- Instrucción -->
+        <div class="instruction" *ngIf="!showResults">
+          <mat-icon>info</mat-icon>
+          <span *ngIf="!selectedGap">Click on a gap [number] above to select it</span>
+          <span *ngIf="selectedGap" class="highlight">Gap {{ selectedGap }} selected → Now click a paragraph below</span>
+        </div>
+
+        <!-- Párrafos disponibles -->
+        <div class="available-paragraphs">
+          <h3>Available Paragraphs:</h3>
+          <div class="paragraphs-list">
+            <div
+              *ngFor="let choice of exercise.payload.choices"
+              class="paragraph-card"
+              [class.used]="isChoiceUsed(choice.key)"
+              [class.clickable]="selectedGap && !showResults"
+              (click)="!showResults && selectedGap && assignParagraphToGap(choice.key)"
+            >
+              <div class="paragraph-header">
+                <span class="paragraph-label">{{ choice.key.toUpperCase() }}</span>
+                <span *ngIf="isChoiceUsed(choice.key)" class="used-in">
+                  ✓ Gap {{ getGapForChoice(choice.key) }}
+                </span>
+              </div>
+              <p class="paragraph-text">{{ choice.value }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resultados -->
+        <div *ngIf="showResults" class="results-summary">
+          <mat-icon>{{ getCorrectGapsCount(exercise) === getTotalGaps(exercise.payload.text) ? 'check_circle' : 'pending' }}</mat-icon>
+          <p>
+            You got <strong>{{ getCorrectGapsCount(exercise) }}</strong> out of
+            <strong>{{ getTotalGaps(exercise.payload.text) }}</strong> correct!
+          </p>
+        </div>
       </div>
 
       <!-- Preguntas compactas (Long Text con compact_questions y compact_answers) -->
@@ -248,6 +310,18 @@
 
     <!-- Controles globales -->
     <div class="exercise-controls">
+      <!-- Botón para verificar respuestas (Missing Paragraphs) -->
+      <button
+        *ngIf="exercise.payload.text && exercise.payload.text.includes('[]') && exercise.payload.choices && !showResults"
+        mat-raised-button
+        color="primary"
+        (click)="checkAnswers()"
+        [disabled]="getObjectKeys(userAnswers).length === 0"
+      >
+        <mat-icon>check</mat-icon>
+        Check Answers
+      </button>
+
       <!-- Botón para verificar respuestas (ejercicios interactivos con compact_questions) -->
       <button
         *ngIf="exercise.payload.compact_questions && exercise.payload.compact_solutions && !showResults"

@@ -20,6 +20,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDialogModule } from '@angular/material/dialog';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { HeaderComponent } from './shared/components/header/header.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { HomeComponent } from './home/home.component';
@@ -66,6 +67,7 @@ import { ExerciseViewerComponent } from './activities/exercise-viewer/exercise-v
     MatTabsModule,
     MatSlideToggleModule,
     MatDialogModule,
+    DragDropModule,
     // Firebase modules
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,
