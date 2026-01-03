@@ -23,8 +23,7 @@ export class HomeComponent {
   }
 
   navigateTo(skill: string): void {
-    // Implementar la navegación a las respectivas páginas cuando estén disponibles
-    console.log(`Navegando a la sección de ${skill}`);
-    this.router.navigate([`/${skill}`]);
+    // Navegar a la vista de actividades del curso seleccionado
+    this.router.navigate(['/activities', skill]);
   }
 }

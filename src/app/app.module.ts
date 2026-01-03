@@ -31,6 +31,9 @@ import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 import { environment } from '../environments/environment';
 import { AdminPanelComponent } from './admin/admin-panel/admin-panel.component';
+import { ActivityBrowserComponent } from './activities/activity-browser/activity-browser.component';
+import { ExerciseListComponent } from './activities/exercise-list/exercise-list.component';
+import { ExerciseViewerComponent } from './activities/exercise-viewer/exercise-viewer.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +42,10 @@ import { AdminPanelComponent } from './admin/admin-panel/admin-panel.component';
     RegisterComponent,
     HeaderComponent,
     HomeComponent,
-    AdminPanelComponent
+    AdminPanelComponent,
+    ActivityBrowserComponent,
+    ExerciseListComponent,
+    ExerciseViewerComponent
   ],
   imports: [
     BrowserModule,

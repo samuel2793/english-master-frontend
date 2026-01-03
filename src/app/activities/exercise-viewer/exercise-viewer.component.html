@@ -1,0 +1,261 @@
+<div class="viewer-container">
+  <div class="header-section">
+    <button mat-icon-button (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="header-content">
+      <p class="breadcrumb">
+        {{ getCourseName() }} / {{ level?.toUpperCase() }} / {{ getActivityDisplayName() }}
+      </p>
+      <h1 class="exercise-title" *ngIf="exercise$ | async as exercise">
+        {{ exercise.payload.title || 'Exercise ' + exerciseId }}
+      </h1>
+      <h1 class="exercise-title" *ngIf="!(exercise$ | async)">Exercise {{ exerciseId }}</h1>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading exercise...</p>
+  </div>
+
+  <div *ngIf="error" class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="loadExercise()">
+      Retry
+    </button>
+  </div>
+
+  <div *ngIf="exercise$ | async as exercise" class="exercise-content">
+    <!-- Grammar Tests -->
+    <div *ngIf="isGrammarTest() && exercise.payload" class="grammar-test">
+      <div *ngFor="let question of exercise.payload; let i = index" class="question-block">
+        <div class="question-header">
+          <span class="question-number">{{ i + 1 }}</span>
+          <div class="topic-badge" *ngIf="question.topic">
+            {{ question.topic.name }}
+          </div>
+        </div>
+
+        <p class="question-text">{{ question.text }}</p>
+
+        <div class="choices">
+          <div
+            *ngFor="let choice of parseGrammarChoices(question.choices); let j = index"
+            class="choice"
+            [class.correct]="showAnswers && choice === question.solution"
+          >
+            <span class="choice-label">{{ getChoiceLabel(j) }}.</span>
+            <span class="choice-text">{{ choice }}</span>
+            <mat-icon *ngIf="showAnswers && choice === question.solution" class="check-icon">
+              check_circle
+            </mat-icon>
+          </div>
+        </div>
+
+        <div *ngIf="showAnswers && question.explanation" class="explanation">
+          <mat-icon>lightbulb</mat-icon>
+          <p>{{ question.explanation }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Speaking -->
+    <div *ngIf="isSpeaking() && exercise.payload" class="speaking-exercise">
+      <div *ngIf="exercise.payload.image" class="speaking-image">
+        <img
+          [src]="getSpeakingImageUrl(exercise.payload.image)"
+          [alt]="'Speaking exercise image ' + exercise.payload.image"
+          (error)="onImageError($event)"
+        />
+      </div>
+
+      <div class="speaking-questions">
+        <h3>Questions:</h3>
+        <ol>
+          <li *ngFor="let question of exercise.payload.questions">
+            {{ question }}
+          </li>
+        </ol>
+      </div>
+
+      <div *ngIf="exercise.payload.notes" class="speaking-notes">
+        <mat-icon>info</mat-icon>
+        <p>{{ exercise.payload.notes }}</p>
+      </div>
+    </div>
+
+    <!-- Writing -->
+    <div *ngIf="isWriting() && exercise.payload" class="writing-exercise">
+      <div *ngIf="exercise.payload.opening" class="writing-section">
+        <h3>Opening</h3>
+        <p>{{ exercise.payload.opening }}</p>
+      </div>
+
+      <div *ngIf="exercise.payload.subject" class="writing-section">
+        <h3>Subject</h3>
+        <p>{{ exercise.payload.subject }}</p>
+      </div>
+
+      <div *ngIf="exercise.payload.paragraphs && exercise.payload.paragraphs.length > 0" class="writing-section">
+        <h3>Paragraphs</h3>
+        <ol>
+          <li *ngFor="let paragraph of exercise.payload.paragraphs">
+            {{ paragraph }}
+          </li>
+        </ol>
+      </div>
+
+      <div *ngIf="exercise.payload.points && exercise.payload.points.length > 0" class="writing-section">
+        <h3>Key Points</h3>
+        <ul>
+          <li *ngFor="let point of exercise.payload.points">
+            {{ point }}
+          </li>
+        </ul>
+      </div>
+
+      <div *ngIf="exercise.payload.closure" class="writing-section">
+        <h3>Closure</h3>
+        <p>{{ exercise.payload.closure }}</p>
+      </div>
+    </div>
+
+    <!-- Listening / Reading / Use of English (Generic) -->
+    <div
+      *ngIf="!isGrammarTest() && !isSpeaking() && !isWriting() && exercise.payload"
+      class="generic-exercise"
+    >
+      <!-- Título y subtítulo -->
+      <div *ngIf="exercise.payload.title" class="exercise-header">
+        <h2>{{ exercise.payload.title }}</h2>
+        <p *ngIf="exercise.payload.subtitle" class="subtitle">{{ exercise.payload.subtitle }}</p>
+      </div>
+
+      <!-- Textos (para Cross Matching y similares) -->
+      <div *ngIf="exercise.payload.texts && exercise.payload.texts.length > 0" class="texts-section">
+        <div *ngFor="let textItem of exercise.payload.texts" class="text-item">
+          <h3 *ngIf="textItem.title">{{ textItem.title }}</h3>
+          <p class="text-content">{{ textItem.text }}</p>
+        </div>
+      </div>
+
+      <!-- Texto único (para otros tipos) -->
+      <div *ngIf="exercise.payload.text && !exercise.payload.texts" class="main-text">
+        <p [innerHTML]="exercise.payload.text"></p>
+      </div>
+
+      <!-- Preguntas (formato objeto con keys numéricas, ej: Cross Matching) -->
+      <div *ngIf="exercise.payload.questions && !isArray(exercise.payload.questions)" class="questions-section">
+        <h3>Questions</h3>
+        <div *ngFor="let key of getObjectKeys(exercise.payload.questions)" class="question-item">
+          <p class="question">
+            <strong>{{ key }}.</strong> {{ exercise.payload.questions[key] }}
+          </p>
+
+          <!-- Selector de respuesta interactivo -->
+          <div class="answer-selector">
+            <button
+              *ngFor="let choice of exercise.payload.choices"
+              mat-stroked-button
+              [color]="userAnswers[key] === choice ? 'primary' : ''"
+              [class.selected]="userAnswers[key] === choice && !showResults"
+              [class.correct]="showResults && userAnswers[key] === choice && isCorrectAnswer(key, exercise.payload.solutions)"
+              [class.incorrect]="showResults && userAnswers[key] === choice && !isCorrectAnswer(key, exercise.payload.solutions)"
+              [disabled]="showResults"
+              (click)="selectAnswer(key, choice)"
+            >
+              {{ choice }}
+            </button>
+          </div>
+
+          <!-- Mostrar respuesta correcta si está mal -->
+          <div *ngIf="showResults && !isCorrectAnswer(key, exercise.payload.solutions) && exercise.payload.solutions[key]" class="correct-answer">
+            <mat-icon>info</mat-icon>
+            <span>Correct answer: {{ exercise.payload.solutions[key] }}</span>
+          </div>
+        </div>
+
+        <!-- Choices/Opciones disponibles (solo mostrar si no está en modo interactivo) -->
+        <div *ngIf="!exercise.payload.choices || exercise.payload.choices.length === 0" class="choices-info">
+          <h4>Available Choices:</h4>
+          <div class="choices-list">
+            <span *ngFor="let choice of exercise.payload.choices; let last = last" class="choice-badge">
+              {{ choice }}<span *ngIf="!last">, </span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Resultados -->
+        <div *ngIf="showResults && exercise.payload.solutions" class="results-summary">
+          <mat-icon>{{ getCorrectCount(exercise.payload.solutions) === getObjectKeys(exercise.payload.questions).length ? 'check_circle' : 'pending' }}</mat-icon>
+          <p>
+            You got <strong>{{ getCorrectCount(exercise.payload.solutions) }}</strong> out of
+            <strong>{{ getObjectKeys(exercise.payload.questions).length }}</strong> correct!
+          </p>
+        </div>
+      </div>
+
+      <!-- Preguntas (formato array, ej: otros ejercicios) -->
+      <div *ngIf="exercise.payload.questions && isArray(exercise.payload.questions) && exercise.payload.questions.length > 0" class="questions-section">
+        <h3>Questions</h3>
+        <div *ngFor="let q of exercise.payload.questions; let i = index" class="question-item">
+          <p class="question"><strong>{{ i + 1 }}.</strong> {{ q.question || q }}</p>
+          <div *ngIf="q.options" class="options">
+            <div *ngFor="let opt of q.options" class="option">
+              {{ opt }}
+            </div>
+          </div>
+          <div *ngIf="showAnswers && q.answer" class="answer">
+            <mat-icon>check_circle</mat-icon>
+            <span>Answer: {{ q.answer }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fallback: mostrar JSON crudo si no encaja en ningún patrón -->
+      <details class="raw-data">
+        <summary>View Raw Data</summary>
+        <pre>{{ formatJson(exercise.payload) }}</pre>
+      </details>
+    </div>
+
+    <!-- Controles globales -->
+    <div class="exercise-controls">
+      <!-- Botón para verificar respuestas (ejercicios interactivos) -->
+      <button
+        *ngIf="exercise.payload.questions && !isArray(exercise.payload.questions) && exercise.payload.solutions && !showResults"
+        mat-raised-button
+        color="primary"
+        (click)="checkAnswers()"
+        [disabled]="getObjectKeys(userAnswers).length === 0"
+      >
+        <mat-icon>check</mat-icon>
+        Check Answers
+      </button>
+
+      <!-- Botón para reintentar -->
+      <button
+        *ngIf="showResults"
+        mat-raised-button
+        color="accent"
+        (click)="resetExercise()"
+      >
+        <mat-icon>refresh</mat-icon>
+        Try Again
+      </button>
+
+      <!-- Botón para mostrar/ocultar respuestas (otros tipos) -->
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="toggleAnswers()"
+        *ngIf="(isGrammarTest() || (exercise.payload.questions && isArray(exercise.payload.questions) && exercise.payload.questions.length > 0)) && !showResults"
+      >
+        <mat-icon>{{ showAnswers ? 'visibility_off' : 'visibility' }}</mat-icon>
+        {{ showAnswers ? 'Hide Answers' : 'Show Answers' }}
+      </button>
+    </div>
+  </div>
+</div>

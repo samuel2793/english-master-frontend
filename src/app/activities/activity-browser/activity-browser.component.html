@@ -1,0 +1,54 @@
+<div class="browser-container">
+  <div class="header-section">
+    <button mat-icon-button (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="header-content">
+      <h1 class="course-title">{{ courseName }}</h1>
+      <p class="level-badge">Level: {{ level?.toUpperCase() }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading activities...</p>
+  </div>
+
+  <div *ngIf="error" class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="loadActivities()">
+      Retry
+    </button>
+  </div>
+
+  <div *ngIf="activities$ | async as activityList" class="activities-grid">
+    <mat-card
+      *ngFor="let activity of activityList.items"
+      class="activity-card"
+      (click)="navigateToActivity(activity)"
+    >
+      <mat-card-header>
+        <mat-icon mat-card-avatar color="primary">folder</mat-icon>
+        <mat-card-title>{{ activity.name }}</mat-card-title>
+        <mat-card-subtitle *ngIf="activity.count">
+          {{ activity.count }} exercise{{ activity.count !== 1 ? 's' : '' }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content *ngIf="activity.description">
+        <p>{{ activity.description }}</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button color="primary">
+          Start
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <div *ngIf="activityList.items.length === 0" class="empty-state">
+      <mat-icon>inbox</mat-icon>
+      <p>No activities found for this level.</p>
+    </div>
+  </div>
+</div>

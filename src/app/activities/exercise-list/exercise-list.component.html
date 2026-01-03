@@ -1,0 +1,59 @@
+<div class="list-container">
+  <div class="header-section">
+    <button mat-icon-button (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="header-content">
+      <p class="breadcrumb">
+        {{ courseName }} / {{ level?.toUpperCase() }}
+      </p>
+      <h1 class="activity-title">{{ getActivityDisplayName() }}</h1>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading exercises...</p>
+  </div>
+
+  <div *ngIf="error" class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="loadExercises()">
+      Retry
+    </button>
+  </div>
+
+  <div *ngIf="exercises$ | async as exerciseList" class="exercises-container">
+    <div class="exercises-grid">
+      <mat-card
+        *ngFor="let exercise of exerciseList.items; let i = index"
+        class="exercise-card"
+        (click)="navigateToExercise(exercise)"
+      >
+        <div class="exercise-number">{{ i + 1 }}</div>
+        <mat-card-content>
+          <h3>{{ exercise.payload?.title || 'Exercise ' + exercise.id }}</h3>
+          <p class="exercise-meta">
+            <mat-icon>description</mat-icon>
+            {{ course }} exercise
+          </p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-icon-button color="primary">
+            <mat-icon>play_circle_filled</mat-icon>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+
+    <div *ngIf="exerciseList.items.length === 0" class="empty-state">
+      <mat-icon>inbox</mat-icon>
+      <p>No exercises found.</p>
+    </div>
+
+    <div *ngIf="exerciseList.hasMore" class="load-more">
+      <button mat-raised-button color="primary">Load More</button>
+    </div>
+  </div>
+</div>
