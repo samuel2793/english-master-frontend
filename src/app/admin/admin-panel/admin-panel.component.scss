@@ -1,0 +1,233 @@
+.admin-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: white;
+
+  h1 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 28px;
+
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  button {
+    background-color: white !important;
+    color: #667eea !important;
+  }
+}
+
+.tab-content {
+  padding: 24px 0;
+}
+
+.section-header {
+  margin-bottom: 24px;
+
+  h2 {
+    margin: 0 0 8px;
+    color: #333;
+  }
+
+  p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+  }
+}
+
+.tab-icon {
+  margin-right: 8px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px;
+  background-color: #f5f5f5;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: #999;
+  }
+
+  p {
+    margin-top: 16px;
+    color: #666;
+  }
+}
+
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.user-card {
+  mat-card-header {
+    margin-bottom: 16px;
+
+    mat-icon[mat-card-avatar] {
+      background-color: #667eea;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #666;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        color: #667eea;
+      }
+    }
+  }
+
+  mat-card-actions {
+    padding: 16px;
+    border-top: 1px solid #e0e0e0;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+.levels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.level-card {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: visible;
+
+  &.disabled {
+    opacity: 0.6;
+    background-color: #f5f5f5;
+
+    .level-code {
+      color: #999;
+    }
+
+    .level-status-icon mat-icon {
+      color: #999;
+    }
+  }
+
+  mat-card-content {
+    padding: 32px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .level-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 24px;
+    width: 100%;
+  }
+
+  .level-status-icon {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: #4caf50;
+    }
+  }
+
+  .level-code {
+    font-size: 48px;
+    font-weight: 700;
+    color: #667eea;
+    margin: 0;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  .level-name {
+    font-size: 14px;
+    color: #666;
+    margin-top: 8px;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+
+  .level-toggle {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding-top: 16px;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 16px;
+  }
+
+  .admin-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+
+    h1 {
+      font-size: 24px;
+    }
+  }
+
+  .users-grid,
+  .levels-grid {
+    grid-template-columns: 1fr;
+  }
+}

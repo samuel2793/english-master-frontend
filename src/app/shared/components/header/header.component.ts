@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { User } from 'src/app/interfaces/auth.interfaces';
 import { EnglishLevelService } from 'src/app/services/english-level.service';
@@ -21,7 +22,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
-    private englishLevelService: EnglishLevelService
+    private englishLevelService: EnglishLevelService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -90,6 +92,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
   // Método para verificar si el usuario es administrador
   isAdmin(): boolean {
     return this.currentUser?.email === 'padillasamuel2793@gmail.com';
+  }
+
+  // Método para ir al panel de admin
+  goToAdminPanel(): void {
+    this.router.navigate(['/admin']);
   }
 
   // Método para cerrar sesión

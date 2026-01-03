@@ -4,6 +4,8 @@ import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { HomeComponent } from './home/home.component';
 import { AuthGuard } from './guards/auth.guard';
+import { AdminGuard } from './guards/admin.guard';
+import { AdminPanelComponent } from './admin/admin-panel/admin-panel.component';
 
 const routes: Routes = [
   {
@@ -13,6 +15,11 @@ const routes: Routes = [
   },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  {
+    path: 'admin',
+    component: AdminPanelComponent,
+    canActivate: [AuthGuard, AdminGuard]  // Solo admins autenticados
+  },
   { path: '**', redirectTo: '/' } // Redirige al home si la ruta no existe
 ];
 

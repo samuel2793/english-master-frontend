@@ -17,6 +17,9 @@ import { MatInputModule }      from '@angular/material/input';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatDialogModule } from '@angular/material/dialog';
 import { HeaderComponent } from './shared/components/header/header.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { HomeComponent } from './home/home.component';
@@ -27,6 +30,7 @@ import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 import { environment } from '../environments/environment';
+import { AdminPanelComponent } from './admin/admin-panel/admin-panel.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +38,8 @@ import { environment } from '../environments/environment';
     LoginComponent,
     RegisterComponent,
     HeaderComponent,
-    HomeComponent
+    HomeComponent,
+    AdminPanelComponent
   ],
   imports: [
     BrowserModule,
@@ -52,6 +57,9 @@ import { environment } from '../environments/environment';
     MatMenuModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
+    MatTabsModule,
+    MatSlideToggleModule,
+    MatDialogModule,
     // Firebase modules
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,
