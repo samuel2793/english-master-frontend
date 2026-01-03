@@ -53,6 +53,10 @@
     <span class="user-name">
       <mat-icon>person</mat-icon>
       {{ getUserDisplayName() }}
+      <mat-chip class="admin-badge" *ngIf="isAdmin()">
+        <mat-icon matChipAvatar>shield</mat-icon>
+        Admin
+      </mat-chip>
     </span>
     <button mat-raised-button color="warn" (click)="logout()">
       <mat-icon>logout</mat-icon>

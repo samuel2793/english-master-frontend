@@ -47,3 +47,7 @@ Thumbs.db
 # Other
 contenido_total.txt
 exportar.sh
+
+# Firebase environment files with sensitive data
+src/environments/environment.ts
+src/environments/environment.prod.ts

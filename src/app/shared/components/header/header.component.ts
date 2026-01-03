@@ -33,8 +33,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
       // Cargar niveles cuando el usuario está autenticado
       if (this.isLoggedIn) {
         this.loadLevels();
-        // Cargar el nivel de inglés del usuario actual
-        this.englishLevelService.loadUserEnglishLevel().subscribe();
       }
     });
 
@@ -89,8 +87,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
     );
   }
 
+  // Método para verificar si el usuario es administrador
+  isAdmin(): boolean {
+    return this.currentUser?.email === 'padillasamuel2793@gmail.com';
+  }
+
   // Método para cerrar sesión
   logout(): void {
-    this.authService.logout();
+    this.authService.logout().subscribe();
   }
 }

@@ -10,15 +10,20 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface AuthResponse {
-  jwt: string;
-  email: string;
-  username: string;
-}
-
 // Interfaz para el usuario autenticado
 export interface User {
-  token: string;
-  email?: string;
-  username?: string;
+  uid: string;
+  email: string;
+  username: string;
+  englishLevel?: string;
+}
+
+// Interfaz para datos de usuario en Firestore
+export interface UserData {
+  uid: string;
+  email: string;
+  username: string;
+  englishLevel: string;
+  createdAt: any;
+  updatedAt: any;
 }

@@ -14,6 +14,7 @@ export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   hidePassword = true;
   error: string | null = null;
+  isLoggedIn = false;
 
   constructor(
     private fb: FormBuilder,
@@ -23,10 +24,19 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Verificar si ya hay un usuario autenticado
+    this.authService.currentUser$.subscribe(user => {
+      this.isLoggedIn = !!user;
+    });
+
     this.loginForm = this.fb.group({
       email:    ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+  }
+
+  goToHome(): void {
+    this.router.navigate(['/']);
   }
 
   onSubmit(): void {
@@ -43,12 +53,8 @@ export class LoginComponent implements OnInit {
     };
 
     this.authService.login(loginData).subscribe({
-      next: (response) => {
-        console.log('Login exitoso', response);
-
-        // Almacenar token JWT de momento en localStorage pero quiero en un futuro usar una sesión
-        // o un servicio de almacenamiento seguro
-        localStorage.setItem('auth_token', response.jwt);
+      next: (user) => {
+        console.log('Login exitoso', user);
 
         // Mostrar toast de éxito
         this.snackBar.open('¡Inicio de sesión exitoso!', 'Cerrar', {
@@ -63,13 +69,7 @@ export class LoginComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error en el login', err);
-
-        // Verificar si el error recibido es un array
-        if (Array.isArray(err.error) && err.error.length > 0) {
-          this.error = err.error[0].message || 'Error al iniciar sesión';
-        } else {
-          this.error = err.error?.message || 'Error al iniciar sesión';
-        }
+        this.error = err.error?.message || 'Error al iniciar sesión';
 
         // Mostrar toast de error
         this.snackBar.open(this.error!, 'Cerrar', {
@@ -80,5 +80,37 @@ export class LoginComponent implements OnInit {
         });
       }
     });
+  }
+
+  // Método para iniciar sesión con Google
+  async loginWithGoogle(): Promise<void> {
+    console.log('Método loginWithGoogle llamado');
+
+    try {
+      const user = await this.authService.loginWithGoogle();
+      console.log('Login con Google exitoso', user);
+
+      // Mostrar toast de éxito
+      this.snackBar.open('¡Inicio de sesión con Google exitoso!', 'Cerrar', {
+        duration: 5000,
+        panelClass: ['success-snackbar'],
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom'
+      });
+
+      // Redirigir a la página principal
+      this.router.navigate(['/']);
+    } catch (err: any) {
+      console.error('Error en el login con Google', err);
+      this.error = err.message || 'Error al iniciar sesión con Google';
+
+      // Mostrar toast de error
+      this.snackBar.open(this.error!, 'Cerrar', {
+        duration: 7000,
+        panelClass: ['error-snackbar'],
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom'
+      });
+    }
   }
 }

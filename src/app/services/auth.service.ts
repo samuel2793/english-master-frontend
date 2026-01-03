@@ -1,161 +1,281 @@
-import { Injectable, Injector } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { BehaviorSubject, Observable, catchError, tap, throwError } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, from, throwError, of } from 'rxjs';
 import { Router } from '@angular/router';
-import {
-  RegisterRequest,
-  LoginRequest,
-  AuthResponse,
-  User,
-} from '../interfaces/auth.interfaces';
-import { EnglishLevelService } from './english-level.service';
+import { User, RegisterRequest, LoginRequest, UserData } from '../interfaces/auth.interfaces';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:8080/api/v1/auth';
-  private readonly TOKEN_KEY = 'auth_token';
-  private readonly USER_DATA_KEY = 'auth_user_data'; // Clave para datos de usuario
-
-  // BehaviorSubject para mantener el estado de autenticación
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router, private injector: Injector) {
-    // Verificar si hay un token guardado al iniciar la app
-    this.checkUserSession();
+  constructor(
+    private afAuth: AngularFireAuth,
+    private firestore: AngularFirestore,
+    private router: Router
+  ) {
+    this.initAuthListener();
   }
 
-  // Verifica si el usuario tiene una sesión activa
-  private checkUserSession(): void {
-    const token = localStorage.getItem(this.TOKEN_KEY);
+  private initAuthListener(): void {
+    this.afAuth.authState.subscribe(async (firebaseUser) => {
+      if (firebaseUser) {
+        const userDoc = await this.firestore
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .get()
+          .toPromise();
 
-    if (token) {
-      // Intentar recuperar los datos del usuario
-      const userDataStr = localStorage.getItem(this.USER_DATA_KEY);
-      let userData: User = { token };
-
-      if (userDataStr) {
-        try {
-          const userInfo = JSON.parse(userDataStr);
-          userData = {
-            ...userData,
-            email: userInfo.email,
-            username: userInfo.username || userInfo.email, // Fallback al email si no hay username
+        if (userDoc && userDoc.exists) {
+          const userData = userDoc.data() as UserData;
+          const user: User = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email || '',
+            username: userData.username,
+            englishLevel: userData.englishLevel
           };
-        } catch (e) {
-          console.error('Error al parsear datos del usuario', e);
-        }
-      }
+          this.currentUserSubject.next(user);
+        } else {
+          const username = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Usuario';
+          const userDoc: UserData = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email || '',
+            username: username,
+            englishLevel: 'A1',
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
 
-      this.currentUserSubject.next(userData);
-    }
+          await this.firestore.collection('users').doc(firebaseUser.uid).set(userDoc);
+
+          const user: User = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email || '',
+            username: username,
+            englishLevel: 'A1'
+          };
+          this.currentUserSubject.next(user);
+        }
+      } else {
+        this.currentUserSubject.next(null);
+      }
+    });
   }
 
-  // Getter para saber si el usuario está autenticado
   public get isLoggedIn(): boolean {
     return !!this.currentUserSubject.value;
   }
 
-  // Obtener el usuario actual
   public get currentUser(): User | null {
     return this.currentUserSubject.value;
   }
 
-  // Método para registrar un usuario
-  register(userData: RegisterRequest): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${this.API_URL}/register`, userData)
-      .pipe(catchError(this.handleError));
+  register(userData: RegisterRequest): Observable<User> {
+    return from(
+      this.afAuth.createUserWithEmailAndPassword(userData.email, userData.password)
+    ).pipe(
+      switchMap((userCredential) => {
+        if (!userCredential.user) {
+          return throwError(() => new Error('Error al crear usuario'));
+        }
+
+        const userDoc: UserData = {
+          uid: userCredential.user.uid,
+          email: userData.email,
+          username: userData.username,
+          englishLevel: 'A1',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+
+        return from(
+          this.firestore.collection('users').doc(userCredential.user.uid).set(userDoc)
+        ).pipe(
+          map(() => ({
+            uid: userCredential.user!.uid,
+            email: userData.email,
+            username: userData.username,
+            englishLevel: 'A1'
+          }))
+        );
+      }),
+      catchError((error) => {
+        console.error('Error en el registro:', error);
+        return throwError(() => this.handleFirebaseError(error));
+      })
+    );
   }
 
-  // Método para iniciar sesión
-  login(loginData: LoginRequest): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${this.API_URL}/login`, loginData)
-      .pipe(
-        tap((response) => {
-          // Guardar token en localStorage
-          localStorage.setItem(this.TOKEN_KEY, response.jwt);
+  login(loginData: LoginRequest): Observable<User> {
+    return from(
+      this.afAuth.signInWithEmailAndPassword(loginData.email, loginData.password)
+    ).pipe(
+      switchMap((userCredential) => {
+        if (!userCredential.user) {
+          return throwError(() => new Error('Error al iniciar sesión'));
+        }
 
-          // Guardar datos del usuario
-          const userInfo = {
-            email: response.email,
-            username: response.username || response.email, // Si no hay username, usar email
-          };
-          localStorage.setItem(this.USER_DATA_KEY, JSON.stringify(userInfo));
-
-          // Actualizar el estado de autenticación
-          const user: User = {
-            token: response.jwt,
-            email: response.email,
-            username: response.username || response.email, // Si no hay username, usar email
-          };
-          this.currentUserSubject.next(user);
-
-          // Cargar el nivel de inglés del usuario autenticado
-          this.injector
-            .get(EnglishLevelService)
-            .loadUserEnglishLevel()
-            .subscribe();
-        }),
-        catchError(this.handleError)
-      );
+        return this.firestore
+          .collection('users')
+          .doc(userCredential.user.uid)
+          .get()
+          .pipe(
+            map((userDoc) => {
+              if (userDoc.exists) {
+                const userData = userDoc.data() as UserData;
+                return {
+                  uid: userCredential.user!.uid,
+                  email: userCredential.user!.email || '',
+                  username: userData.username,
+                  englishLevel: userData.englishLevel
+                };
+              } else {
+                return {
+                  uid: userCredential.user!.uid,
+                  email: userCredential.user!.email || '',
+                  username: userCredential.user!.displayName || userCredential.user!.email?.split('@')[0] || 'Usuario'
+                };
+              }
+            })
+          );
+      }),
+      tap((user) => {
+        this.currentUserSubject.next(user);
+      }),
+      catchError((error) => {
+        console.error('Error en el login:', error);
+        return throwError(() => this.handleFirebaseError(error));
+      })
+    );
   }
 
-  // Método para cerrar sesión
-  logout(): void {
-    // Obtener el token del localStorage
-    const token = localStorage.getItem(this.TOKEN_KEY);
+  async loginWithGoogle(): Promise<User> {
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const result = await this.afAuth.signInWithPopup(provider);
 
-    if (token) {
-      // Configurar el encabezado con el token JWT
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
+      if (!result.user) {
+        throw new Error('Error al iniciar sesión con Google');
+      }
 
-      // Enviar petición POST a logout
-      this.http
-        .post(`${this.API_URL}/logout`, {}, { headers })
-        .pipe(
-          catchError((error) => {
-            console.error('Error al cerrar sesión:', error);
-            return throwError(() => error);
-          })
-        )
-        .subscribe({
-          next: () => {
-            // Limpieza y redirección
-            this.handleLogoutSuccess();
-          },
-          error: () => {
-            // En caso de error, continuar con logout local de todas formas
-            this.handleLogoutSuccess();
-          },
-        });
-    } else {
-      // Si no hay token, simplemente limpiar y redirigir
-      this.handleLogoutSuccess();
+      const userDoc = await this.firestore
+        .collection('users')
+        .doc(result.user.uid)
+        .get()
+        .toPromise();
+
+      if (userDoc && userDoc.exists) {
+        const userData = userDoc.data() as UserData;
+        const user: User = {
+          uid: result.user.uid,
+          email: result.user.email || '',
+          username: userData.username,
+          englishLevel: userData.englishLevel
+        };
+        this.currentUserSubject.next(user);
+        return user;
+      } else {
+        const username = result.user.displayName || result.user.email?.split('@')[0] || 'Usuario';
+        const newUserDoc: UserData = {
+          uid: result.user.uid,
+          email: result.user.email || '',
+          username: username,
+          englishLevel: 'A1',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+
+        await this.firestore.collection('users').doc(result.user.uid).set(newUserDoc);
+
+        const user: User = {
+          uid: result.user.uid,
+          email: result.user.email || '',
+          username: username,
+          englishLevel: 'A1'
+        };
+        this.currentUserSubject.next(user);
+        return user;
+      }
+    } catch (error) {
+      console.error('Error en el login con Google:', error);
+      throw this.handleFirebaseError(error);
     }
   }
 
-  // Método privado para ejecutar el proceso de logout local
-  private handleLogoutSuccess(): void {
-    // Limpiar localStorage
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_DATA_KEY);
-
-    // Actualizar el estado de autenticación
-    this.currentUserSubject.next(null);
-
-    // Redirigir al login
-    this.router.navigate(['/login']);
+  logout(): Observable<void> {
+    return from(this.afAuth.signOut()).pipe(
+      tap(() => {
+        this.currentUserSubject.next(null);
+        this.router.navigate(['/login']);
+      }),
+      catchError((error) => {
+        console.error('Error al cerrar sesión:', error);
+        this.currentUserSubject.next(null);
+        this.router.navigate(['/login']);
+        return of(undefined);
+      })
+    );
   }
 
-  // Método para manejar errores de HTTP
-  private handleError(error: HttpErrorResponse) {
-    console.error('Error HTTP:', error);
-    return throwError(() => error);
+  updateEnglishLevel(level: string): Observable<void> {
+    const user = this.currentUserSubject.value;
+    if (!user) {
+      return throwError(() => new Error('Usuario no autenticado'));
+    }
+
+    return from(
+      this.firestore.collection('users').doc(user.uid).update({
+        englishLevel: level,
+        updatedAt: new Date()
+      })
+    ).pipe(
+      tap(() => {
+        this.currentUserSubject.next({ ...user, englishLevel: level });
+      }),
+      catchError((error) => {
+        console.error('Error al actualizar nivel de inglés:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  private handleFirebaseError(error: any): any {
+    let message = 'Ha ocurrido un error';
+
+    switch (error.code) {
+      case 'auth/email-already-in-use':
+        message = 'Este correo electrónico ya está registrado';
+        break;
+      case 'auth/invalid-email':
+        message = 'Correo electrónico inválido';
+        break;
+      case 'auth/operation-not-allowed':
+        message = 'Operación no permitida';
+        break;
+      case 'auth/weak-password':
+        message = 'La contraseña es demasiado débil';
+        break;
+      case 'auth/user-disabled':
+        message = 'Esta cuenta ha sido deshabilitada';
+        break;
+      case 'auth/user-not-found':
+      case 'auth/wrong-password':
+      case 'auth/invalid-credential':
+        message = 'Credenciales inválidas';
+        break;
+      case 'auth/too-many-requests':
+        message = 'Demasiados intentos. Por favor, intenta más tarde';
+        break;
+      default:
+        message = error.message || 'Error desconocido';
+    }
+
+    return { error: { message } };
   }
 }

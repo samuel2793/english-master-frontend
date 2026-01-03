@@ -15,6 +15,7 @@ export class RegisterComponent implements OnInit {
   hidePassword = true;
   hideConfirm  = true;
   error: string | null = null;
+  isLoggedIn = false;
 
   constructor(
     private fb: FormBuilder,
@@ -24,12 +25,21 @@ export class RegisterComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Verificar si ya hay un usuario autenticado
+    this.authService.currentUser$.subscribe(user => {
+      this.isLoggedIn = !!user;
+    });
+
     this.registerForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirm: ['', [Validators.required, this.matchPassword.bind(this)]]
     });
+  }
+
+  goToHome(): void {
+    this.router.navigate(['/']);
   }
 
   private matchPassword(control: AbstractControl): {[key: string]: boolean} | null {
@@ -82,5 +92,35 @@ export class RegisterComponent implements OnInit {
         });
       }
     });
+  }
+
+  // Método para registrarse con Google
+  async registerWithGoogle(): Promise<void> {
+    try {
+      const user = await this.authService.loginWithGoogle();
+      console.log('Registro con Google exitoso', user);
+
+      // Mostrar toast de éxito
+      this.snackBar.open('¡Registro con Google exitoso!', 'Cerrar', {
+        duration: 5000,
+        panelClass: ['success-snackbar'],
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom'
+      });
+
+      // Redirigir a la página principal
+      this.router.navigate(['/']);
+    } catch (err: any) {
+      console.error('Error en el registro con Google', err);
+      this.error = err.message || 'Error al registrarse con Google';
+
+      // Mostrar toast de error
+      this.snackBar.open(this.error!, 'Cerrar', {
+        duration: 7000,
+        panelClass: ['error-snackbar'],
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom'
+      });
+    }
   }
 }

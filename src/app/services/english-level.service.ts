@@ -1,108 +1,76 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, map, tap, of, catchError } from 'rxjs';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { EnglishLevelResponse } from '../interfaces/english-level.interfaces';
+import { BehaviorSubject, Observable, from, of } from 'rxjs';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { AuthService } from './auth.service';
+import { catchError, map, tap } from 'rxjs/operators';
+
+export interface EnglishLevel {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  orderIndex: number;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class EnglishLevelService {
-  private readonly API_URL = 'http://localhost:8080/api/english-levels';
-  private readonly USER_LEVEL_API_URL =
-    'http://localhost:8080/api/users/me/english-level';
-  private readonly TOKEN_KEY = 'auth_token'; // La misma clave que usa AuthService
-
-  // Lista de niveles disponibles (se cargará desde la API)
+  // Lista de niveles disponibles
   private availableLevels: string[] = [];
 
   // Nivel actual del usuario
   private currentLevel = new BehaviorSubject<string>('');
   public currentLevel$ = this.currentLevel.asObservable();
 
-  constructor(private http: HttpClient) {
-    // Al iniciar, intentamos cargar el nivel del usuario si está autenticado
-    // y luego cargamos la lista de niveles disponibles
-    this.loadUserEnglishLevel().subscribe(() => {
-      this.loadAvailableLevels().subscribe();
+  constructor(
+    private firestore: AngularFirestore,
+    private authService: AuthService
+  ) {
+    // Suscribirse a cambios en el usuario para cargar su nivel
+    this.authService.currentUser$.subscribe((user) => {
+      if (user) {
+        // Usuario autenticado, cargar niveles
+        this.loadAvailableLevels().subscribe();
+
+        if (user.englishLevel) {
+          this.currentLevel.next(user.englishLevel);
+        } else {
+          // Si el usuario no tiene nivel, establecer A1 por defecto
+          this.setUserLevel('A1');
+        }
+      } else {
+        // Usuario no autenticado, usar niveles por defecto
+        this.availableLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+        this.currentLevel.next('');
+      }
     });
   }
 
-  // Obtener todos los niveles disponibles desde la API
+  // Cargar niveles disponibles desde Firestore
   loadAvailableLevels(): Observable<string[]> {
-    // Obtener el token del localStorage
-    const token = localStorage.getItem(this.TOKEN_KEY);
-
-    if (!token) {
-      return of([]);
-    }
-
-    // Crear los headers con el token
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-    });
-
-    return this.http
-      .get<EnglishLevelResponse[]>(this.API_URL, { headers })
+    return this.firestore
+      .collection<EnglishLevel>('englishLevels', ref => ref.orderBy('orderIndex'))
+      .valueChanges()
       .pipe(
-        map((response) => response.map((level) => level.code)),
+        map((levels) => {
+          return levels.map((level) => level.code);
+        }),
         tap((levels) => {
           this.availableLevels = levels;
 
-          // Si el nivel actual está vacío y tenemos niveles disponibles, establecer el primero
+          // Si no hay nivel actual y hay niveles disponibles, establecer el primero
           if (!this.currentLevel.getValue() && levels.length > 0) {
             this.currentLevel.next(levels[0]);
           }
         }),
         catchError((error) => {
           console.error('Error al cargar niveles de inglés:', error);
-          return of([]);
+          // Devolver niveles por defecto si hay error
+          this.availableLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+          return of(this.availableLevels);
         })
       );
-  }
-
-  // Cargar el nivel de inglés del usuario desde la API
-  loadUserEnglishLevel(): Observable<string> {
-    const token = localStorage.getItem(this.TOKEN_KEY);
-
-    if (!token) {
-      return of(this.currentLevel.getValue());
-    }
-
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-    });
-
-    console.log('Solicitando nivel de inglés del usuario...');
-
-    return this.http.get<any>(this.USER_LEVEL_API_URL, { headers }).pipe(
-      tap((response) =>
-        console.log('Respuesta del servidor (nivel inglés):', response)
-      ),
-      map((response) => {
-        // Adaptamos para aceptar diferentes formatos de respuesta posibles
-        let level = '';
-        if (typeof response === 'string') {
-          level = response;
-        } else if (response && response.level) {
-          level = response.level;
-        } else if (response && response.englishLevel) {
-          level = response.englishLevel;
-        } else if (response && response.code) {
-          level = response.code;
-        }
-        return level;
-      }),
-      tap((level) => {
-        // console.log('Nivel de inglés obtenido:', level);
-        if (level) {
-          this.currentLevel.next(level);
-        }
-      }),
-      catchError((error) => {
-        console.error('Error al obtener nivel de inglés del usuario:', error);
-        return of(this.currentLevel.getValue());
-      })
-    );
   }
 
   // Obtener todos los niveles disponibles
@@ -113,49 +81,29 @@ export class EnglishLevelService {
     return of([...this.availableLevels]);
   }
 
-  // Obtener el nivel actual del usuario como string
+  // Obtener el nivel actual del usuario
   getCurrentLevel(): string {
     return this.currentLevel.getValue();
   }
 
   // Establecer el nivel del usuario
   setUserLevel(level: string): void {
-    if (this.availableLevels.includes(level)) {
-      // Obtener el token para autorizar la petición
-      const token = localStorage.getItem(this.TOKEN_KEY);
-
-      if (!token) {
-        console.error(
-          'No se puede establecer el nivel: usuario no autenticado'
-        );
-        return;
-      }
-
-      // Crear los headers con el token
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${token}`,
-      });
-
-      // URL para establecer el nivel de inglés
-      const url = `http://localhost:8080/api/users/me/english-level/${level}`;
-
-      // Realizar la petición PUT al endpoint
-      this.http.put<any>(url, {}, { headers }).subscribe({
-        next: () => {
-          // Actualizamos el nivel localmente después de la respuesta exitosa
-          this.currentLevel.next(level);
-          console.log(`Nivel de inglés establecido a: ${level}`);
-        },
-        error: (error) => {
-          console.error('Error al establecer nivel de inglés:', error);
-        },
-      });
-    } else {
+    if (!this.availableLevels.includes(level)) {
       console.error(
-        `Nivel "${level}" no válido, debe ser uno de: ${this.availableLevels.join(
-          ', '
-        )}`
+        `Nivel "${level}" no válido, debe ser uno de: ${this.availableLevels.join(', ')}`
       );
+      return;
     }
+
+    // Actualizar en el servicio de autenticación
+    this.authService.updateEnglishLevel(level).subscribe({
+      next: () => {
+        this.currentLevel.next(level);
+        console.log(`Nivel de inglés establecido a: ${level}`);
+      },
+      error: (error) => {
+        console.error('Error al establecer nivel de inglés:', error);
+      }
+    });
   }
 }

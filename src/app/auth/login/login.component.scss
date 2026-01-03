@@ -1,20 +1,150 @@
 .login-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
+  align-items: center;
   justify-content: center;
-  margin-top: 100px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  overflow-y: auto;
 }
 
-mat-card {
+.login-card {
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
 }
 
-.full-width {
+.logo-section {
+  text-align: center;
+  margin-bottom: 32px;
+  color: white;
+
+  .app-logo {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    padding: 16px;
+    backdrop-filter: blur(10px);
+  }
+
+  .app-title {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .app-subtitle {
+    margin: 8px 0 0;
+    font-size: 16px;
+    opacity: 0.95;
+    font-weight: 300;
+  }
+}
+
+.auth-card {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+
+  mat-card-content {
+    padding: 40px 32px;
+  }
+}
+
+.welcome-title {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+}
+
+.welcome-subtitle {
+  margin: 0 0 32px;
+  font-size: 15px;
+  color: #666;
+  text-align: center;
+  font-weight: 400;
+}
+
+.google-button {
   width: 100%;
-}
-
-.actions {
-  margin-top: 16px;
+  height: 56px;
+  background-color: white !important;
+  color: #3c4043 !important;
+  border: 1px solid #dadce0 !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0.25px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
   display: flex;
+  align-items: center;
   justify-content: center;
+  gap: 12px;
+
+  &:hover {
+    background-color: #f8f9fa !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .google-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.home-button {
+  width: 100%;
+  height: 56px;
+  background-color: #667eea !important;
+  color: white !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0.25px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  &:hover {
+    background-color: #5568d3 !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.register-link {
+  margin-top: 24px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+
+  span {
+    margin-right: 4px;
+  }
+
+  button {
+    font-weight: 500;
+  }
 }

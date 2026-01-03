@@ -60,6 +60,26 @@
   }
 }
 
+/* Badge de administrador */
+.admin-badge {
+  margin-left: 12px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%) !important;
+  color: #333 !important;
+  font-weight: 600;
+  font-size: 12px;
+  height: 28px;
+  padding: 0 8px;
+  border: 2px solid #ffa500;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+
+  mat-icon {
+    color: #333 !important;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
 /* Adaptación para dispositivos móviles */
 @media (max-width: 768px) {
   .toolbar-title {
