@@ -194,16 +194,6 @@
           <strong>{{ exercise.payload.people.length }}</strong> correct!
         </p>
       </div>
-
-      <!-- Botones de acción -->
-      <div class="action-buttons">
-        <button mat-raised-button color="primary" (click)="checkAnswers()" *ngIf="!showResults">
-          Check Answers
-        </button>
-        <button mat-raised-button color="accent" (click)="resetExercise()" *ngIf="showResults">
-          Try Again
-        </button>
-      </div>
     </div>
 
     <!-- Listening / Reading / Use of English (Generic) -->
@@ -226,12 +216,12 @@
       </div>
 
       <!-- Texto único (para otros tipos) -->
-      <div *ngIf="exercise.payload.text && !exercise.payload.texts && !exercise.payload.text.includes('[]')" class="main-text">
+      <div *ngIf="exercise.payload.text && !exercise.payload.texts && !hasMissingGaps(exercise.payload.text)" class="main-text">
         <p class="text-content" style="white-space: pre-line;">{{ formatTextWithBreaks(exercise.payload.text) }}</p>
       </div>
 
-      <!-- Missing Paragraphs (texto con [] y choices) -->
-      <div *ngIf="exercise.payload.text && exercise.payload.text.includes('[]') && exercise.payload.choices" class="missing-paragraphs">
+      <!-- Missing Paragraphs / Missing Sentences (texto con gaps y choices) -->
+      <div *ngIf="exercise.payload.text && hasMissingGaps(exercise.payload.text) && exercise.payload.choices" class="missing-paragraphs">
         <!-- Texto continuo con gaps inline -->
         <div class="continuous-text">
           <ng-container *ngFor="let segment of getTextSegments(exercise.payload.text)">
@@ -247,7 +237,7 @@
             >
               <span class="gap-bracket">[</span>
               <span class="gap-number">{{ segment.index }}</span>
-              <span *ngIf="userAnswers[segment.index]" class="gap-answer">: {{ userAnswers[segment.index].toUpperCase() }}</span>
+              <span *ngIf="userAnswers[segment.index]" class="gap-answer">: {{ userAnswers[segment.index] }}</span>
               <span class="gap-bracket">]</span>
             </span>
           </ng-container>
@@ -262,7 +252,7 @@
 
         <!-- Párrafos disponibles -->
         <div class="available-paragraphs">
-          <h3>Available Paragraphs:</h3>
+          <h3>Available Options:</h3>
           <div class="paragraphs-list">
             <div
               *ngFor="let choice of exercise.payload.choices"
@@ -272,7 +262,7 @@
               (click)="!showResults && selectedGap && assignParagraphToGap(choice.key)"
             >
               <div class="paragraph-header">
-                <span class="paragraph-label">{{ choice.key.toUpperCase() }}</span>
+                <span class="paragraph-label">{{ choice.key }}</span>
                 <span *ngIf="isChoiceUsed(choice.key)" class="used-in">
                   ✓ Gap {{ getGapForChoice(choice.key) }}
                 </span>
@@ -288,6 +278,58 @@
           <p>
             You got <strong>{{ getCorrectGapsCount(exercise) }}</strong> out of
             <strong>{{ getTotalGaps(exercise.payload.text) }}</strong> correct!
+          </p>
+        </div>
+      </div>
+
+      <!-- Signs (imágenes con preguntas de opción múltiple) -->
+      <div *ngIf="(exercise.payload.compact_images || exercise.payload.images) && exercise.payload.compact_choices" class="signs-section">
+        <h3>Look at the signs and choose the correct answer</h3>
+        <div *ngFor="let key of getObjectKeys(exercise.payload.compact_choices)" class="sign-item">
+          <div class="sign-image">
+            <img
+              [src]="exercise.payload.compact_images ? exercise.payload.compact_images[key] : getImageByKey(exercise.payload.images, key)"
+              [alt]="'Sign ' + key"
+              (error)="onImageError($event)"
+            />
+          </div>
+
+          <div class="sign-question">
+            <p class="question-text">
+              <strong>{{ key }}.</strong> {{ getSignQuestion(exercise.payload.compact_choices[key]) }}
+            </p>
+
+            <!-- Opciones de respuesta -->
+            <div class="answer-selector vertical">
+              <button
+                *ngFor="let choice of getSignChoices(exercise.payload.compact_choices[key]); let i = index"
+                mat-stroked-button
+                [color]="userAnswers[key] === choice ? 'primary' : ''"
+                [class.selected]="userAnswers[key] === choice && !showResults"
+                [class.correct]="showResults && userAnswers[key] === choice && isCorrectAnswer(key, exercise.payload.compact_solutions)"
+                [class.incorrect]="showResults && userAnswers[key] === choice && !isCorrectAnswer(key, exercise.payload.compact_solutions)"
+                [disabled]="showResults"
+                (click)="selectAnswer(key, choice)"
+              >
+                <span class="choice-label">{{ getChoiceLabel(i) }}.</span>
+                <span class="choice-text">{{ choice }}</span>
+              </button>
+            </div>
+
+            <!-- Mostrar respuesta correcta si está mal -->
+            <div *ngIf="showResults && !isCorrectAnswer(key, exercise.payload.compact_solutions) && exercise.payload.compact_solutions && exercise.payload.compact_solutions[key]" class="correct-answer">
+              <mat-icon>info</mat-icon>
+              <span>Correct answer: {{ exercise.payload.compact_solutions[key] }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resultados -->
+        <div *ngIf="showResults && exercise.payload.compact_solutions" class="results-summary">
+          <mat-icon>{{ getCorrectCount(exercise.payload.compact_solutions) === getObjectKeys(exercise.payload.compact_choices).length ? 'check_circle' : 'pending' }}</mat-icon>
+          <p>
+            You got <strong>{{ getCorrectCount(exercise.payload.compact_solutions) }}</strong> out of
+            <strong>{{ getObjectKeys(exercise.payload.compact_choices).length }}</strong> correct!
           </p>
         </div>
       </div>
@@ -394,9 +436,33 @@
 
     <!-- Controles globales -->
     <div class="exercise-controls">
-      <!-- Botón para verificar respuestas (Missing Paragraphs) -->
+      <!-- Botón para verificar respuestas (Missing Paragraphs / Missing Sentences) -->
       <button
-        *ngIf="exercise.payload.text && exercise.payload.text.includes('[]') && exercise.payload.choices && !showResults"
+        *ngIf="exercise.payload.text && hasMissingGaps(exercise.payload.text) && exercise.payload.choices && !showResults"
+        mat-raised-button
+        color="primary"
+        (click)="checkAnswers()"
+        [disabled]="getObjectKeys(userAnswers).length === 0"
+      >
+        <mat-icon>check</mat-icon>
+        Check Answers
+      </button>
+
+      <!-- Botón para verificar respuestas (Matching) -->
+      <button
+        *ngIf="exercise.payload.people && exercise.payload.texts && exercise.payload.solutions && !showResults"
+        mat-raised-button
+        color="primary"
+        (click)="checkAnswers()"
+        [disabled]="getObjectKeys(userAnswers).length === 0"
+      >
+        <mat-icon>check</mat-icon>
+        Check Answers
+      </button>
+
+      <!-- Botón para verificar respuestas (Signs) -->
+      <button
+        *ngIf="(exercise.payload.compact_images || exercise.payload.images) && exercise.payload.compact_choices && exercise.payload.compact_solutions && !showResults"
         mat-raised-button
         color="primary"
         (click)="checkAnswers()"

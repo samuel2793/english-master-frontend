@@ -101,6 +101,12 @@ export class ExerciseViewerComponent implements OnInit {
     return this.activity?.toLowerCase().includes('matching') || false;
   }
 
+  hasMissingGaps(text: string): boolean {
+    if (!text) return false;
+    // Detectar si tiene patrón (1) ........... o []
+    return /\(\d+\)\s*\.{3,}/.test(text) || text.includes('[]');
+  }
+
   parseGrammarChoices(choicesString: string): string[] {
     return this.activitiesService.parseGrammarChoices(choicesString);
   }
@@ -127,8 +133,8 @@ export class ExerciseViewerComponent implements OnInit {
   }
 
   getExerciseDisplayTitle(exercise: Exercise): string {
-    // Para "matching", siempre mostrar solo "Exercise"
-    if (this.activity?.toLowerCase() === 'matching') {
+    // Para "matching" y "signs", siempre mostrar solo "Exercise"
+    if (this.activity?.toLowerCase() === 'matching' || this.activity?.toLowerCase() === 'signs') {
       return 'Exercise';
     }
     // Para otros ejercicios, usar el título del payload o "Exercise + ID"
@@ -195,26 +201,53 @@ export class ExerciseViewerComponent implements OnInit {
     return count;
   }
 
-  // Métodos para Missing Paragraphs
+  // Métodos para Missing Paragraphs y Missing Sentences
   getTextSegments(text: string): Array<{type: string, content?: string, index?: string}> {
     if (!text) return [];
     const segments: Array<{type: string, content?: string, index?: string}> = [];
-    const parts = text.split('[]');
 
-    parts.forEach((part, index) => {
-      if (part.trim()) {
-        segments.push({ type: 'text', content: part.trim() });
+    // Detectar si usa patrón (1) ........... o []
+    const hasMissingSentencesPattern = /\(\d+\)\s*\.{3,}/g.test(text);
+
+    if (hasMissingSentencesPattern) {
+      // Patrón para Missing Sentences: (1) ...........
+      const regex = /(.*?)\((\d+)\)\s*\.{3,}/g;
+      let lastIndex = 0;
+      let match;
+
+      while ((match = regex.exec(text)) !== null) {
+        if (match[1]) {
+          segments.push({ type: 'text', content: match[1] });
+        }
+        segments.push({ type: 'gap', index: match[2] });
+        lastIndex = regex.lastIndex;
       }
-      if (index < parts.length - 1) {
-        segments.push({ type: 'gap', index: (index + 1).toString() });
+
+      // Añadir texto restante
+      if (lastIndex < text.length) {
+        segments.push({ type: 'text', content: text.substring(lastIndex) });
       }
-    });
+    } else {
+      // Patrón para Missing Paragraphs: []
+      const parts = text.split('[]');
+      parts.forEach((part, index) => {
+        if (part.trim()) {
+          segments.push({ type: 'text', content: part.trim() });
+        }
+        if (index < parts.length - 1) {
+          segments.push({ type: 'gap', index: (index + 1).toString() });
+        }
+      });
+    }
 
     return segments;
   }
 
   getTotalGaps(text: string): number {
-    return (text.match(/\[\]/g) || []).length;
+    // Contar gaps de patrón (1) ........... o []
+    const missingSentencesGaps = (text.match(/\(\d+\)\s*\.{3,}/g) || []).length;
+    const missingParagraphsGaps = (text.match(/\[\]/g) || []).length;
+    return missingSentencesGaps > 0 ? missingSentencesGaps : missingParagraphsGaps;
   }
 
   getChoiceText(choices: any[], key: string): string {
@@ -235,6 +268,21 @@ export class ExerciseViewerComponent implements OnInit {
   }
 
   checkGapAnswer(gapIndex: string, exercise: Exercise): boolean {
+    // Para Missing Sentences con solutions
+    if (exercise.payload.solutions && Array.isArray(exercise.payload.solutions)) {
+      const solution = exercise.payload.solutions.find((s: any) => s.key?.toString() === gapIndex);
+      if (solution) {
+        const userAnswerKey = this.userAnswers[gapIndex];
+        const userAnswerText = exercise.payload.choices?.find((c: any) => c.key?.toString() === userAnswerKey)?.value;
+        return userAnswerText === solution.value;
+      }
+    }
+    // Para Missing Sentences con compact_solutions
+    if (exercise.payload.compact_solutions && exercise.payload.compact_solutions[gapIndex]) {
+      const userAnswerKey = this.userAnswers[gapIndex];
+      const userAnswerText = exercise.payload.choices?.find((c: any) => c.key?.toString() === userAnswerKey)?.value;
+      return userAnswerText === exercise.payload.compact_solutions[gapIndex];
+    }
     // Para Missing Paragraphs, el orden correcto es alfabético: gap 1=a, gap 2=b, etc.
     if (exercise.payload.choices && exercise.payload.text?.includes('[]')) {
       const expectedAnswer = this.getExpectedAnswerForGap(parseInt(gapIndex));
@@ -298,6 +346,26 @@ export class ExerciseViewerComponent implements OnInit {
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     img.style.display = 'none';
+  }
+
+  // Métodos para ejercicios de Signs
+  getSignQuestion(choiceText: string): string {
+    // Formato: "Pregunta||opción1//opción2//opción3"
+    if (!choiceText || !choiceText.includes('||')) return choiceText;
+    return choiceText.split('||')[0];
+  }
+
+  getSignChoices(choiceText: string): string[] {
+    // Formato: "Pregunta||opción1//opción2//opción3"
+    if (!choiceText || !choiceText.includes('||')) return [];
+    const parts = choiceText.split('||');
+    if (parts.length < 2) return [];
+    return parts[1].split('//').map(c => c.trim());
+  }
+
+  getImageByKey(images: any[], key: string): string {
+    const image = images?.find(img => img.key?.toString() === key);
+    return image ? image.value : '';
   }
 
   // Métodos para ejercicios de Matching (personas con opciones)
