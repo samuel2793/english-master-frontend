@@ -97,8 +97,9 @@ export class ExerciseViewerComponent implements OnInit {
   }
 
   isMatching(): boolean {
-    // Detectar ejercicios de tipo Matching por su estructura
-    return this.activity?.toLowerCase().includes('matching') || false;
+    // Detectar ejercicios de tipo Matching por su estructura (personas con textos)
+    // NO por el nombre de la actividad
+    return false; // Se detectará por la presencia de people y texts en el HTML
   }
 
   hasMissingGaps(text: string): boolean {
@@ -133,8 +134,8 @@ export class ExerciseViewerComponent implements OnInit {
   }
 
   getExerciseDisplayTitle(exercise: Exercise): string {
-    // Para "matching" y "signs", siempre mostrar solo "Exercise"
-    if (this.activity?.toLowerCase() === 'matching' || this.activity?.toLowerCase() === 'signs') {
+    // Para "matching" (no "multiple-matching") y "signs", siempre mostrar solo "Exercise"
+    if ((this.activity?.toLowerCase() === 'matching' || this.activity?.toLowerCase() === 'signs')) {
       return 'Exercise';
     }
     // Para otros ejercicios, usar el título del payload o "Exercise + ID"

@@ -123,7 +123,7 @@
     </div>
 
     <!-- Matching (People with options) -->
-    <div *ngIf="isMatching() && exercise.payload && exercise.payload.people && exercise.payload.texts" class="matching-exercise">
+    <div *ngIf="exercise.payload && exercise.payload.people && exercise.payload.texts" class="matching-exercise">
       <!-- Título del ejercicio -->
       <div *ngIf="exercise.payload.title" class="exercise-intro">
         <h2>{{ exercise.payload.title }}</h2>

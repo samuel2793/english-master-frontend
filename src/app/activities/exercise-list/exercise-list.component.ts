@@ -95,7 +95,7 @@ export class ExerciseListComponent implements OnInit {
   }
 
   getExerciseTitle(exercise: Exercise, index: number): string {
-    // Para "matching" y "signs", siempre mostrar "Exercise N"
+    // Para "matching" (no "multiple-matching") y "signs", siempre mostrar "Exercise N"
     if (this.activity?.toLowerCase() === 'matching' || this.activity?.toLowerCase() === 'signs') {
       return `Exercise ${index + 1}`;
     }
