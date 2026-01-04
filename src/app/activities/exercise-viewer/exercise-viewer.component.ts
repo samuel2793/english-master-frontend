@@ -31,6 +31,7 @@ export class ExerciseViewerComponent implements OnInit {
   userAnswers: { [key: string]: string } = {};
   showResults = false;
   selectedGap: string | null = null; // Gap seleccionado para Missing Paragraphs
+  shuffledChoices: any[] = []; // Opciones aleatorizadas para Missing Paragraphs
   isAdmin = false;
 
   constructor(
@@ -75,9 +76,29 @@ export class ExerciseViewerComponent implements OnInit {
         })
       );
 
-    this.exercise$.subscribe(() => {
+    this.exercise$.subscribe((exercise) => {
       this.loading = false;
+      // Aleatorizar opciones para Missing Paragraphs/Sentences
+      if (exercise?.payload?.choices) {
+        this.shuffledChoices = this.shuffleAndRelabelChoices([...exercise.payload.choices]);
+      }
     });
+  }
+
+  shuffleAndRelabelChoices(choices: any[]): any[] {
+    // Primero aleatorizamos el orden
+    const shuffled = [...choices];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    // Luego reasignamos las letras en orden alfabético
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+    return shuffled.map((choice, index) => ({
+      ...choice,
+      displayKey: alphabet[index] // Nueva clave para mostrar
+    }));
   }
 
   goBack(): void {
@@ -261,6 +282,12 @@ export class ExerciseViewerComponent implements OnInit {
   getChoiceText(choices: any[], key: string): string {
     const choice = choices.find(c => c.key === key);
     return choice ? choice.value : '';
+  }
+
+  getDisplayKey(originalKey: string): string {
+    // Buscar en shuffledChoices la displayKey correspondiente
+    const choice = this.shuffledChoices.find(c => c.key === originalKey);
+    return choice?.displayKey || originalKey;
   }
 
   getAvailableChoices(choices: any[]): any[] {

@@ -237,7 +237,7 @@
             >
               <span class="gap-bracket">[</span>
               <span class="gap-number">{{ segment.index }}</span>
-              <span *ngIf="userAnswers[segment.index]" class="gap-answer">: {{ userAnswers[segment.index] }}</span>
+              <span *ngIf="userAnswers[segment.index]" class="gap-answer">: {{ getDisplayKey(userAnswers[segment.index]) }}</span>
               <span class="gap-bracket">]</span>
             </span>
           </ng-container>
@@ -255,14 +255,14 @@
           <h3>Available Options:</h3>
           <div class="paragraphs-list">
             <div
-              *ngFor="let choice of exercise.payload.choices"
+              *ngFor="let choice of shuffledChoices"
               class="paragraph-card"
               [class.used]="isChoiceUsed(choice.key)"
               [class.clickable]="selectedGap && !showResults"
               (click)="!showResults && selectedGap && assignParagraphToGap(choice.key)"
             >
               <div class="paragraph-header">
-                <span class="paragraph-label">{{ choice.key }}</span>
+                <span class="paragraph-label">{{ choice.displayKey || choice.key }}</span>
                 <span *ngIf="isChoiceUsed(choice.key)" class="used-in">
                   ✓ Gap {{ getGapForChoice(choice.key) }}
                 </span>
