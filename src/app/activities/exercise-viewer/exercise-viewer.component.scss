@@ -129,7 +129,7 @@
 
       .choice {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 12px;
         padding: 12px 16px;
         background: white;
@@ -151,10 +151,14 @@
           font-weight: 700;
           color: #667eea;
           min-width: 24px;
+          flex-shrink: 0;
         }
 
         .choice-text {
           flex: 1;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          line-height: 1.5;
         }
 
         .check-icon {
@@ -316,6 +320,9 @@
           background: white;
           border-radius: 6px;
           border: 1px solid #e0e0e0;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          line-height: 1.5;
         }
       }
 
@@ -593,6 +600,8 @@
             line-height: 1.6;
             color: #2c3e50;
             margin: 0;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
           }
         }
       }
@@ -662,6 +671,9 @@
       display: flex;
       align-items: flex-start;
       gap: 8px;
+      white-space: normal !important;
+      height: auto !important;
+      line-height: 1.4;
 
       .choice-label {
         flex-shrink: 0;
@@ -672,6 +684,8 @@
       .choice-text {
         flex: 1;
         line-height: 1.4;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
       }
 
       &.selected {
