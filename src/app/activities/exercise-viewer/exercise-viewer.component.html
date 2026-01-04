@@ -198,7 +198,7 @@
 
     <!-- Listening / Reading / Use of English (Generic) -->
     <div
-      *ngIf="!isGrammarTest() && !isSpeaking() && !isWriting() && !isMatching() && exercise.payload"
+      *ngIf="!isGrammarTest() && !isSpeaking() && !isWriting() && !isMatching() && !exercise.payload.people && exercise.payload"
       class="generic-exercise"
     >
       <!-- Título y subtítulo -->
