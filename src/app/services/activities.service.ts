@@ -133,11 +133,18 @@ export class ActivitiesService {
               }
             }
 
+            // Filtrar Exercise bare
+            const title = doc.data?.title || '';
+            const isBareExercise = title.toLowerCase().includes('exercise bare') ||
+                                  title.toLowerCase() === 'bare' ||
+                                  doc.filename.toLowerCase().includes('bare');
+
             // Filtrar archivos de índice y cantidades
             if (groupName &&
                 !doc.filename.includes('index') &&
                 !doc.filename.includes('quantities') &&
-                !doc.filename.includes('activities')) {
+                !doc.filename.includes('activities') &&
+                !isBareExercise) {
               const count = groups.get(groupName) || 0;
               groups.set(groupName, count + 1);
             }
@@ -199,10 +206,17 @@ export class ActivitiesService {
               // Comparar tanto por nombre exacto como por slug
               const matches = groupName === activity || groupSlug === activityNormalized;
 
+              // Filtrar "Exercise bare" o ejercicios sin título válido
+              const title = doc.data?.title || '';
+              const isBareExercise = title.toLowerCase().includes('exercise bare') ||
+                                    title.toLowerCase() === 'bare' ||
+                                    doc.filename.toLowerCase().includes('bare');
+
               return matches &&
                      !doc.filename.includes('index') &&
                      !doc.filename.includes('quantities') &&
-                     !doc.filename.includes('activities');
+                     !doc.filename.includes('activities') &&
+                     !isBareExercise;
             })
             .sort((a, b) => a.filename.localeCompare(b.filename, undefined, { numeric: true }))
             .slice(0, limit)
