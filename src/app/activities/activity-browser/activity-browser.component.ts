@@ -78,6 +78,31 @@ export class ActivityBrowserComponent implements OnInit {
     this.router.navigate(['/activities', this.course, this.level, activitySlug]);
   }
 
+  navigateToRandomExercise(activity: ActivityIndex, event: Event): void {
+    event.stopPropagation();
+
+    if (!this.course || !this.level) return;
+
+    const activitySlug = activity.slug || activity.name.toLowerCase().replace(/\s+/g, '-');
+
+    // Obtener todos los ejercicios de la actividad
+    this.activitiesService.listExercises(this.course, this.level, activitySlug).subscribe({
+      next: (exerciseList) => {
+        if (exerciseList.items.length > 0) {
+          // Seleccionar un ejercicio aleatorio
+          const randomIndex = Math.floor(Math.random() * exerciseList.items.length);
+          const randomExercise = exerciseList.items[randomIndex];
+
+          // Navegar al ejercicio aleatorio
+          this.router.navigate(['/activities', this.course, this.level, activitySlug, randomExercise.id]);
+        }
+      },
+      error: (err) => {
+        console.error('Error loading exercises for random selection:', err);
+      }
+    });
+  }
+
   goBack(): void {
     this.router.navigate(['/']);
   }

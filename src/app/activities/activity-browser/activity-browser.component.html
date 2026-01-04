@@ -43,6 +43,15 @@
           Start
           <mat-icon>arrow_forward</mat-icon>
         </button>
+        <button
+          mat-button
+          color="accent"
+          (click)="navigateToRandomExercise(activity, $event)"
+          class="random-button"
+        >
+          <mat-icon>shuffle</mat-icon>
+          Random
+        </button>
       </mat-card-actions>
     </mat-card>
 
