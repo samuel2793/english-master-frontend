@@ -328,26 +328,57 @@ export class ExerciseViewerComponent implements OnInit {
   }
 
   checkGapAnswer(gapIndex: string, exercise: Exercise): boolean {
-    // Para Missing Sentences con solutions
-    if (exercise.payload.solutions && Array.isArray(exercise.payload.solutions)) {
-      const solution = exercise.payload.solutions.find((s: any) => s.key?.toString() === gapIndex);
-      if (solution) {
-        const userAnswerKey = this.userAnswers[gapIndex];
-        const userAnswerText = exercise.payload.choices?.find((c: any) => c.key?.toString() === userAnswerKey)?.value;
-        return userAnswerText === solution.value;
-      }
-    }
-    // Para Missing Sentences con compact_solutions
-    if (exercise.payload.compact_solutions && exercise.payload.compact_solutions[gapIndex]) {
+    // Detectar tipo de ejercicio: Missing Sentences (1) ... o Missing Paragraphs []
+    const isMissingSentences = exercise.payload.text?.match(/\(\d+\)\s*\.{3,}/g);
+    const isMissingParagraphs = exercise.payload.text?.includes('[]');
+
+    // Para Missing Sentences con solutions o compact_solutions
+    if (isMissingSentences && (exercise.payload.solutions || exercise.payload.compact_solutions)) {
       const userAnswerKey = this.userAnswers[gapIndex];
-      const userAnswerText = exercise.payload.choices?.find((c: any) => c.key?.toString() === userAnswerKey)?.value;
-      return userAnswerText === exercise.payload.compact_solutions[gapIndex];
+      if (!userAnswerKey) return false;
+
+      // Buscar el texto de la respuesta del usuario (puede venir de shuffledChoices)
+      let userAnswerText: string | undefined;
+      if (this.shuffledChoices.length > 0) {
+        userAnswerText = this.shuffledChoices.find((c: any) => c.key?.toString() === userAnswerKey?.toString())?.value;
+      }
+      if (!userAnswerText && exercise.payload.choices) {
+        userAnswerText = exercise.payload.choices.find((c: any) => c.key?.toString() === userAnswerKey?.toString())?.value;
+      }
+
+      // Obtener la solución correcta
+      let correctAnswerText: string | undefined;
+      if (exercise.payload.compact_solutions && exercise.payload.compact_solutions[gapIndex]) {
+        correctAnswerText = exercise.payload.compact_solutions[gapIndex];
+      } else if (exercise.payload.solutions && Array.isArray(exercise.payload.solutions)) {
+        const solution = exercise.payload.solutions.find((s: any) => s.key?.toString() === gapIndex);
+        correctAnswerText = solution?.value;
+      }
+
+      return userAnswerText === correctAnswerText;
     }
+
     // Para Missing Paragraphs, el orden correcto es alfabético: gap 1=a, gap 2=b, etc.
-    if (exercise.payload.choices && exercise.payload.text?.includes('[]')) {
-      const expectedAnswer = this.getExpectedAnswerForGap(parseInt(gapIndex));
-      return this.userAnswers[gapIndex] === expectedAnswer;
+    if (isMissingParagraphs && exercise.payload.choices) {
+      const userAnswerKey = this.userAnswers[gapIndex];
+      if (!userAnswerKey) return false;
+
+      // Obtener el texto de la respuesta del usuario
+      let userAnswerText: string | undefined;
+      if (this.shuffledChoices.length > 0) {
+        userAnswerText = this.shuffledChoices.find((c: any) => c.key?.toString() === userAnswerKey?.toString())?.value;
+      }
+      if (!userAnswerText && exercise.payload.choices) {
+        userAnswerText = exercise.payload.choices.find((c: any) => c.key?.toString() === userAnswerKey?.toString())?.value;
+      }
+
+      // Obtener la solución correcta (orden alfabético)
+      const expectedKey = this.getExpectedAnswerForGap(parseInt(gapIndex));
+      const correctAnswerText = exercise.payload.choices.find((c: any) => c.key?.toString() === expectedKey)?.value;
+
+      return userAnswerText === correctAnswerText;
     }
+
     return !!this.userAnswers[gapIndex];
   }
 
@@ -357,10 +388,6 @@ export class ExerciseViewerComponent implements OnInit {
   }
 
   getCorrectGapsCount(exercise: Exercise): number {
-    if (!exercise.payload.choices || !exercise.payload.text?.includes('[]')) {
-      return Object.keys(this.userAnswers).filter(key => this.userAnswers[key]).length;
-    }
-
     // Contar cuántos gaps tienen la respuesta correcta
     let correctCount = 0;
     for (const gapIndex in this.userAnswers) {
