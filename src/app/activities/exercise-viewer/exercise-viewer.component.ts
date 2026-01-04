@@ -96,6 +96,11 @@ export class ExerciseViewerComponent implements OnInit {
     return this.course === 'writing';
   }
 
+  isMatching(): boolean {
+    // Detectar ejercicios de tipo Matching por su estructura
+    return this.activity?.toLowerCase().includes('matching') || false;
+  }
+
   parseGrammarChoices(choicesString: string): string[] {
     return this.activitiesService.parseGrammarChoices(choicesString);
   }
@@ -119,6 +124,15 @@ export class ExerciseViewerComponent implements OnInit {
     return this.activity
       ? this.activity.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
       : '';
+  }
+
+  getExerciseDisplayTitle(exercise: Exercise): string {
+    // Para "matching", siempre mostrar solo "Exercise"
+    if (this.activity?.toLowerCase() === 'matching') {
+      return 'Exercise';
+    }
+    // Para otros ejercicios, usar el título del payload o "Exercise + ID"
+    return exercise.payload?.title || `Exercise ${this.exerciseId}`;
   }
 
   // Helper para renderizar JSON de manera legible
@@ -284,5 +298,48 @@ export class ExerciseViewerComponent implements OnInit {
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     img.style.display = 'none';
+  }
+
+  // Métodos para ejercicios de Matching (personas con opciones)
+  selectMatchingAnswer(personName: string, optionTitle: string): void {
+    if (this.showResults) return;
+    this.userAnswers[personName] = optionTitle;
+  }
+
+  getMatchingAnswer(personName: string): string | null {
+    return this.userAnswers[personName] || null;
+  }
+
+  isMatchingOptionUsed(optionTitle: string, currentPerson: string): boolean {
+    // Una opción está "usada" si ya está asignada a otra persona (no a la actual)
+    for (const [person, selectedOption] of Object.entries(this.userAnswers)) {
+      if (person !== currentPerson && selectedOption === optionTitle) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  isCorrectMatchingAnswer(personName: string, solutions: any[]): boolean {
+    if (!solutions || !this.userAnswers[personName]) return false;
+    const solution = solutions.find(s => s.person === personName);
+    return solution && this.userAnswers[personName] === solution.title;
+  }
+
+  getCorrectMatchingCount(solutions: any[]): number {
+    if (!solutions) return 0;
+    let count = 0;
+    for (const solution of solutions) {
+      if (this.userAnswers[solution.person] === solution.title) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  getCorrectMatchingSolution(personName: string, solutions: any[]): string | null {
+    if (!solutions) return null;
+    const solution = solutions.find(s => s.person === personName);
+    return solution ? solution.title : null;
   }
 }

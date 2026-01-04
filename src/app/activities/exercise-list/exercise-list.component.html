@@ -33,7 +33,7 @@
       >
         <div class="exercise-number">{{ i + 1 }}</div>
         <mat-card-content>
-          <h3>{{ exercise.payload?.title || 'Exercise ' + exercise.id }}</h3>
+          <h3>{{ getExerciseTitle(exercise, i) }}</h3>
           <p class="exercise-meta">
             <mat-icon>description</mat-icon>
             {{ course }} exercise

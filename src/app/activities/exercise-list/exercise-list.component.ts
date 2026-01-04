@@ -93,4 +93,13 @@ export class ExerciseListComponent implements OnInit {
       ? this.activity.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
       : '';
   }
+
+  getExerciseTitle(exercise: Exercise, index: number): string {
+    // Para "matching", siempre mostrar "Exercise N"
+    if (this.activity?.toLowerCase() === 'matching') {
+      return `Exercise ${index + 1}`;
+    }
+    // Para otros ejercicios, usar el título del payload o el ID
+    return exercise.payload?.title || `Exercise ${exercise.id}`;
+  }
 }

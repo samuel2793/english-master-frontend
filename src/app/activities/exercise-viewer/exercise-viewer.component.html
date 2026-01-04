@@ -8,9 +8,9 @@
         {{ getCourseName() }} / {{ level?.toUpperCase() }} / {{ getActivityDisplayName() }}
       </p>
       <h1 class="exercise-title" *ngIf="exercise$ | async as exercise">
-        {{ exercise.payload.title || 'Exercise ' + exerciseId }}
+        {{ getExerciseDisplayTitle(exercise) }}
       </h1>
-      <h1 class="exercise-title" *ngIf="!(exercise$ | async)">Exercise {{ exerciseId }}</h1>
+      <h1 class="exercise-title" *ngIf="!(exercise$ | async)">Exercise</h1>
     </div>
   </div>
 
@@ -122,9 +122,93 @@
       </div>
     </div>
 
+    <!-- Matching (People with options) -->
+    <div *ngIf="isMatching() && exercise.payload && exercise.payload.people && exercise.payload.texts" class="matching-exercise">
+      <!-- Título del ejercicio -->
+      <div *ngIf="exercise.payload.title" class="exercise-intro">
+        <h2>{{ exercise.payload.title }}</h2>
+      </div>
+
+      <!-- Lista de opciones disponibles (textos/películas/etc) -->
+      <div class="matching-options">
+        <h3>Options:</h3>
+        <div class="options-grid">
+          <div *ngFor="let text of exercise.payload.texts" class="option-card">
+            <h4>{{ text.title }}</h4>
+            <p>{{ text.text }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personas con selectores -->
+      <div class="matching-people">
+        <h3>Match each person with the most suitable option:</h3>
+        <div *ngFor="let person of exercise.payload.people; let i = index" class="person-item">
+          <div class="person-header">
+            <span class="person-number">{{ i + 1 }}</span>
+            <strong>{{ person.name }}</strong>
+          </div>
+          <p class="person-description">{{ person.text }}</p>
+
+          <!-- Selector de respuesta -->
+          <div class="answer-selector">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Select option</mat-label>
+              <mat-select
+                [(value)]="userAnswers[person.name]"
+                [disabled]="showResults"
+                (selectionChange)="selectMatchingAnswer(person.name, $event.value)"
+              >
+                <mat-option [value]="null">-- None --</mat-option>
+                <mat-option
+                  *ngFor="let text of exercise.payload.texts"
+                  [value]="text.title"
+                  [disabled]="isMatchingOptionUsed(text.title, person.name)"
+                >
+                  {{ text.title }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <!-- Feedback de respuesta -->
+            <div *ngIf="showResults" class="answer-feedback">
+              <mat-icon *ngIf="isCorrectMatchingAnswer(person.name, exercise.payload.solutions)" class="correct-icon">
+                check_circle
+              </mat-icon>
+              <mat-icon *ngIf="!isCorrectMatchingAnswer(person.name, exercise.payload.solutions)" class="incorrect-icon">
+                cancel
+              </mat-icon>
+              <span *ngIf="!isCorrectMatchingAnswer(person.name, exercise.payload.solutions)" class="correct-answer-text">
+                Correct: {{ getCorrectMatchingSolution(person.name, exercise.payload.solutions) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div *ngIf="showResults" class="results-summary">
+        <mat-icon>{{ getCorrectMatchingCount(exercise.payload.solutions) === exercise.payload.people.length ? 'check_circle' : 'pending' }}</mat-icon>
+        <p>
+          You got <strong>{{ getCorrectMatchingCount(exercise.payload.solutions) }}</strong> out of
+          <strong>{{ exercise.payload.people.length }}</strong> correct!
+        </p>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="action-buttons">
+        <button mat-raised-button color="primary" (click)="checkAnswers()" *ngIf="!showResults">
+          Check Answers
+        </button>
+        <button mat-raised-button color="accent" (click)="resetExercise()" *ngIf="showResults">
+          Try Again
+        </button>
+      </div>
+    </div>
+
     <!-- Listening / Reading / Use of English (Generic) -->
     <div
-      *ngIf="!isGrammarTest() && !isSpeaking() && !isWriting() && exercise.payload"
+      *ngIf="!isGrammarTest() && !isSpeaking() && !isWriting() && !isMatching() && exercise.payload"
       class="generic-exercise"
     >
       <!-- Título y subtítulo -->
