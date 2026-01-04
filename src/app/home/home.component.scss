@@ -22,24 +22,38 @@
 
 .subtitle {
   text-align: center;
-  margin-bottom: 56px;
+  margin-bottom: 16px;
   color: #666;
-  font-size: 20px;
-  font-weight: 300;
+  font-size: 18px;
+
+  strong {
+    color: #3f51b5;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+
+  p {
+    margin-top: 16px;
+    color: #666;
+  }
 }
 
 .skills-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 32px;
-  margin-bottom: 48px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
 }
 
 .skill-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
   height: 100%;
   border: 1px solid rgba(102, 126, 234, 0.1);
   background: white;
@@ -103,26 +117,45 @@
 
   p {
     font-size: 16px;
-    line-height: 1.6;
-    color: #666;
-    font-weight: 400;
-    margin: 0;
+    line-height: 1.5;
+    color: #555;
+    margin-bottom: 12px;
+  }
+
+  mat-chip-set {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .exercise-type-chip {
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #e3f2fd;
+    }
   }
 }
 
-// Adaptación para tablets
-@media (max-width: 1024px) {
-  .skills-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
+.no-exercises {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 48px;
+    height: 48px;
+    width: 48px;
+    margin-bottom: 16px;
   }
 
-  .main-title {
-    font-size: 40px;
-  }
-
-  .subtitle {
+  p {
     font-size: 18px;
+    color: #666;
   }
 }
 
@@ -154,5 +187,9 @@
     p {
       font-size: 15px;
     }
+  }
+
+  .skill-container {
+    padding: 16px;
   }
 }

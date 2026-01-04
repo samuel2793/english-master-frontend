@@ -1,51 +1,35 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, from, of } from 'rxjs';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { AuthService } from './auth.service';
-import { catchError, map, tap } from 'rxjs/operators';
-
-export interface EnglishLevel {
-  id: string;
-  code: string;
-  name: string;
-  description: string;
-  orderIndex: number;
-  enabled?: boolean;
-}
+import { BehaviorSubject, Observable, map, tap, of, catchError } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { EnglishLevelResponse } from '../interfaces/english-level.interfaces';
+import { ExerciseCatalogResponse } from '../interfaces/exercise-catalog.interfaces';
 
 @Injectable({
   providedIn: 'root',
 })
 export class EnglishLevelService {
-  // Lista de niveles disponibles como Observable para reactividad
-  private availableLevelsSubject = new BehaviorSubject<string[]>([]);
-  public availableLevels$ = this.availableLevelsSubject.asObservable();
+  private readonly API_URL = 'http://localhost:8080/api/english-levels';
+  private readonly USER_LEVEL_API_URL =
+    'http://localhost:8080/api/users/me/english-level';
+  private readonly TOKEN_KEY = 'auth_token';
+
+  // Lista de niveles disponibles (se cargará desde la API)
+  private availableLevels: string[] = [];
+  private availableLevelsData: EnglishLevelResponse[] = []; // Guardamos la data completa
 
   // Nivel actual del usuario
   private currentLevel = new BehaviorSubject<string>('');
   public currentLevel$ = this.currentLevel.asObservable();
 
-  constructor(
-    private firestore: AngularFirestore,
-    private authService: AuthService
-  ) {
-    // Suscribirse a cambios en el usuario para cargar su nivel
-    this.authService.currentUser$.subscribe((user) => {
-      if (user) {
-        // Usuario autenticado, cargar niveles en tiempo real
-        this.loadAvailableLevels();
+  // Nuevo: ID del nivel actual
+  private currentLevelId = new BehaviorSubject<number | null>(null);
+  public currentLevelId$ = this.currentLevelId.asObservable();
 
-        if (user.englishLevel) {
-          this.currentLevel.next(user.englishLevel);
-        } else {
-          // Si el usuario no tiene nivel, establecer A1 por defecto
-          this.setUserLevel('A1');
-        }
-      } else {
-        // Usuario no autenticado, usar niveles por defecto
-        this.availableLevelsSubject.next(['A1', 'A2', 'B1', 'B2', 'C1', 'C2']);
-        this.currentLevel.next('');
-      }
+  constructor(private http: HttpClient) {
+    // Al iniciar, intentamos cargar el nivel del usuario si está autenticado
+    // y luego cargamos la lista de niveles disponibles
+    this.loadUserEnglishLevel().subscribe(() => {
+      this.loadAvailableLevels().subscribe();
     });
   }
 
@@ -55,14 +39,29 @@ export class EnglishLevelService {
       .collection<EnglishLevel>('englishLevels', ref => ref.orderBy('orderIndex'))
       .snapshotChanges()
       .pipe(
-        map((actions) => {
-          const levels = actions.map(a => ({
-            id: a.payload.doc.id,
-            ...a.payload.doc.data()
-          }));
-          // Filtrar solo niveles habilitados
-          const enabledLevels = levels.filter(level => level.enabled !== false);
-          return enabledLevels.map((level) => level.code);
+        map((response) => {
+          // Guardar la respuesta completa
+          this.availableLevelsData = response;
+
+          // Guardar la respuesta completa para poder acceder a los IDs
+          const currentCode = this.currentLevel.getValue();
+          const currentLevelData = response.find((l) => l.code === currentCode);
+          if (currentLevelData) {
+            this.currentLevelId.next(currentLevelData.id);
+          }
+          return response.map((level) => level.code);
+        }),
+        tap((levels) => {
+          this.availableLevels = levels;
+
+          // Si el nivel actual está vacío y tenemos niveles disponibles, establecer el primero
+          if (!this.currentLevel.getValue() && levels.length > 0) {
+            this.currentLevel.next(levels[0]);
+            // También establecer el ID del primer nivel
+            if (this.availableLevelsData.length > 0) {
+              this.currentLevelId.next(this.availableLevelsData[0].id);
+            }
+          }
         }),
         catchError((error) => {
           console.error('Error al cargar niveles de inglés:', error);
@@ -73,11 +72,58 @@ export class EnglishLevelService {
       .subscribe((levels) => {
         this.availableLevelsSubject.next(levels);
 
-        // Si no hay nivel actual y hay niveles disponibles, establecer el primero
-        if (!this.currentLevel.getValue() && levels.length > 0) {
-          this.currentLevel.next(levels[0]);
+  // Cargar el nivel de inglés del usuario desde la API
+  loadUserEnglishLevel(): Observable<string> {
+    const token = localStorage.getItem(this.TOKEN_KEY);
+
+    if (!token) {
+      return of(this.currentLevel.getValue());
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    console.log('Solicitando nivel de inglés del usuario...');
+
+    return this.http.get<any>(this.USER_LEVEL_API_URL, { headers }).pipe(
+      tap((response) =>
+        console.log('Respuesta del servidor (nivel inglés):', response)
+      ),
+      map((response) => {
+        // Adaptamos para aceptar diferentes formatos de respuesta posibles
+        let level = '';
+        let levelId = null;
+
+        if (typeof response === 'string') {
+          level = response;
+        } else if (response && response.level) {
+          level = response.level;
+        } else if (response && response.englishLevel) {
+          level = response.englishLevel;
+        } else if (response && response.code) {
+          level = response.code;
         }
-      });
+
+        // Intentar obtener el ID también
+        if (response && response.id) {
+          levelId = response.id;
+          this.currentLevelId.next(levelId);
+        }
+
+        return level;
+      }),
+      tap((level) => {
+        // console.log('Nivel de inglés obtenido:', level);
+        if (level) {
+          this.currentLevel.next(level);
+        }
+      }),
+      catchError((error) => {
+        console.error('Error al obtener nivel de inglés del usuario:', error);
+        return of(this.currentLevel.getValue());
+      })
+    );
   }
 
   // Obtener todos los niveles disponibles
@@ -92,8 +138,49 @@ export class EnglishLevelService {
 
   // Establecer el nivel del usuario
   setUserLevel(level: string): void {
-    const currentAvailableLevels = this.availableLevelsSubject.getValue();
-    if (!currentAvailableLevels.includes(level)) {
+    if (this.availableLevels.includes(level)) {
+      // Obtener el token para autorizar la petición
+      const token = localStorage.getItem(this.TOKEN_KEY);
+
+      if (!token) {
+        console.error(
+          'No se puede establecer el nivel: usuario no autenticado'
+        );
+        return;
+      }
+
+      // NUEVO: Buscar el levelData ANTES de hacer la petición
+      const levelData = this.availableLevelsData.find((l) => l.code === level);
+
+      if (!levelData) {
+        console.error(`No se encontró el nivel ${level} en los datos disponibles`);
+        return;
+      }
+
+      // Crear los headers con el token
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`,
+      });
+
+      // URL para establecer el nivel de inglés
+      const url = `http://localhost:8080/api/users/me/english-level/${level}`;
+
+      // Realizar la petición PUT al endpoint
+      this.http.put<any>(url, {}, { headers }).subscribe({
+        next: () => {
+          // IMPORTANTE: Actualizar primero el ID, luego el código
+          // Esto asegura que cuando el componente reaccione al cambio del código,
+          // el ID ya esté actualizado
+          this.currentLevelId.next(levelData.id);
+          this.currentLevel.next(level);
+
+          console.log(`Nivel de inglés establecido a: ${level} (ID: ${levelData.id})`);
+        },
+        error: (error) => {
+          console.error('Error al establecer nivel de inglés:', error);
+        },
+      });
+    } else {
       console.error(
         `Nivel "${level}" no válido, debe ser uno de: ${currentAvailableLevels.join(', ')}`
       );
@@ -110,5 +197,35 @@ export class EnglishLevelService {
         console.error('Error al establecer nivel de inglés:', error);
       }
     });
+  }
+
+  // Nuevo: Obtener catálogo de ejercicios por nivel
+  getExerciseCatalog(levelId: number): Observable<ExerciseCatalogResponse> {
+    const token = localStorage.getItem(this.TOKEN_KEY);
+
+    if (!token) {
+      return of({} as ExerciseCatalogResponse);
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    return this.http
+      .get<ExerciseCatalogResponse>(
+        `${this.API_URL}/${levelId}/exercise-catalog`,
+        { headers }
+      )
+      .pipe(
+        catchError((error) => {
+          console.error('Error al cargar catálogo de ejercicios:', error);
+          return of({} as ExerciseCatalogResponse);
+        })
+      );
+  }
+
+  // Obtener el ID del nivel actual
+  getCurrentLevelId(): number | null {
+    return this.currentLevelId.getValue();
   }
 }
