@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ActivitiesService } from '../../services/activities.service';
+import { AuthService } from '../../services/auth.service';
 import {
   CourseType,
   LevelType,
@@ -30,15 +31,21 @@ export class ExerciseViewerComponent implements OnInit {
   userAnswers: { [key: string]: string } = {};
   showResults = false;
   selectedGap: string | null = null; // Gap seleccionado para Missing Paragraphs
+  isAdmin = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private activitiesService: ActivitiesService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.authService.currentUser$.subscribe(user => {
+      this.isAdmin = user?.email === 'padillasamuel2793@gmail.com';
+    });
+
     this.route.params.subscribe((params) => {
       this.course = params['course'] as CourseType;
       this.level = params['level'] as LevelType;

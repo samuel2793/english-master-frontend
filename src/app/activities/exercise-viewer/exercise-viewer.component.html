@@ -428,7 +428,7 @@
       </div>
 
       <!-- Fallback: mostrar JSON crudo si no encaja en ningún patrón -->
-      <details class="raw-data">
+      <details class="raw-data" *ngIf="isAdmin">
         <summary>View Raw Data</summary>
         <pre>{{ formatJson(exercise.payload) }}</pre>
       </details>
