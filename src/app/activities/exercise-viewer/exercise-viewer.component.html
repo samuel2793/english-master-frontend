@@ -345,7 +345,7 @@
           <!-- Selector de respuesta interactivo con opciones múltiples -->
           <div class="answer-selector vertical">
             <button
-              *ngFor="let choice of exercise.payload.compact_answers[key]; let i = index"
+              *ngFor="let choice of getShuffledAnswers(key); let i = index"
               mat-stroked-button
               [color]="userAnswers[key] === choice ? 'primary' : ''"
               [class.selected]="userAnswers[key] === choice && !showResults"

@@ -32,6 +32,7 @@ export class ExerciseViewerComponent implements OnInit {
   showResults = false;
   selectedGap: string | null = null; // Gap seleccionado para Missing Paragraphs
   shuffledChoices: any[] = []; // Opciones aleatorizadas para Missing Paragraphs
+  shuffledAnswers: { [questionKey: string]: string[] } = {}; // Respuestas aleatorizadas para Long Text
   isAdmin = false;
 
   constructor(
@@ -82,6 +83,10 @@ export class ExerciseViewerComponent implements OnInit {
       if (exercise?.payload?.choices) {
         this.shuffledChoices = this.shuffleAndRelabelChoices([...exercise.payload.choices]);
       }
+      // Aleatorizar respuestas para Long Text
+      if (exercise?.payload?.compact_answers) {
+        this.shuffledAnswers = this.shuffleCompactAnswers(exercise.payload.compact_answers);
+      }
     });
   }
 
@@ -99,6 +104,26 @@ export class ExerciseViewerComponent implements OnInit {
       ...choice,
       displayKey: alphabet[index] // Nueva clave para mostrar
     }));
+  }
+
+  shuffleCompactAnswers(compactAnswers: any): { [questionKey: string]: string[] } {
+    const shuffled: { [questionKey: string]: string[] } = {};
+    for (const key in compactAnswers) {
+      if (compactAnswers.hasOwnProperty(key)) {
+        const answers = [...compactAnswers[key]];
+        // Aleatorizar usando Fisher-Yates
+        for (let i = answers.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [answers[i], answers[j]] = [answers[j], answers[i]];
+        }
+        shuffled[key] = answers;
+      }
+    }
+    return shuffled;
+  }
+
+  getShuffledAnswers(questionKey: string): string[] {
+    return this.shuffledAnswers[questionKey] || [];
   }
 
   goBack(): void {
