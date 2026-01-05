@@ -170,6 +170,28 @@ export class ExerciseViewerComponent implements OnInit {
     return this.activitiesService.parseGrammarChoices(choicesString);
   }
 
+  selectGrammarAnswer(questionId: number, choice: string): void {
+    this.userAnswers[`grammar_${questionId}`] = choice;
+  }
+
+  isGrammarChoiceSelected(questionId: number, choice: string): boolean {
+    return this.userAnswers[`grammar_${questionId}`] === choice;
+  }
+
+  isGrammarAnswerCorrect(questionId: number, choice: string, solution: string): boolean {
+    if (!this.showResults) return false;
+    const userAnswer = this.userAnswers[`grammar_${questionId}`];
+    // Mostrar verde solo si el usuario seleccionó esta opción Y es correcta
+    return userAnswer === choice && choice === solution;
+  }
+
+  isGrammarAnswerIncorrect(questionId: number, choice: string, solution: string): boolean {
+    if (!this.showResults) return false;
+    const userAnswer = this.userAnswers[`grammar_${questionId}`];
+    // Mostrar rojo solo si el usuario seleccionó esta opción Y es incorrecta
+    return userAnswer === choice && choice !== solution;
+  }
+
   getSpeakingImageUrl(imageNumber: string): string {
     if (!this.level || !this.activity) return '';
     return this.activitiesService.getSpeakingImageUrl(
@@ -192,6 +214,11 @@ export class ExerciseViewerComponent implements OnInit {
   }
 
   getExerciseDisplayTitle(exercise: Exercise): string {
+    // Grammar Tests siempre muestra solo "Exercise"
+    if (this.course?.toLowerCase() === 'grammar-tests') {
+      return 'Exercise';
+    }
+
     // Lista de actividades que deben mostrar solo "Exercise" dentro del ejercicio
     const activitiesWithSimpleTitle = [
       'signs',

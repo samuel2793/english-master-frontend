@@ -138,15 +138,26 @@
         border-radius: 8px;
         border: 2px solid #e0e0e0;
         transition: all 0.2s;
+        cursor: pointer;
 
         &:hover {
           border-color: #667eea;
           background: rgba(102, 126, 234, 0.05);
         }
 
+        &.selected {
+          border-color: #667eea;
+          background: rgba(102, 126, 234, 0.1);
+        }
+
         &.correct {
           border-color: #4caf50;
           background: rgba(76, 175, 80, 0.1);
+        }
+
+        &.incorrect {
+          border-color: #f44336;
+          background: rgba(244, 67, 54, 0.1);
         }
 
         .choice-label {
@@ -165,6 +176,10 @@
 
         .check-icon {
           color: #4caf50;
+        }
+
+        .error-icon {
+          color: #f44336;
         }
       }
     }

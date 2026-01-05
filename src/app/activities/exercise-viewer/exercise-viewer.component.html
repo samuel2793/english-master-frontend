@@ -29,8 +29,8 @@
 
   <div *ngIf="exercise$ | async as exercise" class="exercise-content">
     <!-- Grammar Tests -->
-    <div *ngIf="isGrammarTest() && exercise.payload" class="grammar-test">
-      <div *ngFor="let question of exercise.payload; let i = index" class="question-block">
+    <div *ngIf="isGrammarTest() && exercise.payload && exercise.payload.questions" class="grammar-test">
+      <div *ngFor="let question of exercise.payload.questions; let i = index" class="question-block">
         <div class="question-header">
           <span class="question-number">{{ i + 1 }}</span>
           <div class="topic-badge" *ngIf="question.topic">
@@ -44,17 +44,23 @@
           <div
             *ngFor="let choice of parseGrammarChoices(question.choices); let j = index"
             class="choice"
-            [class.correct]="showAnswers && choice === question.solution"
+            [class.selected]="isGrammarChoiceSelected(question.id, choice)"
+            [class.correct]="isGrammarAnswerCorrect(question.id, choice, question.solution)"
+            [class.incorrect]="isGrammarAnswerIncorrect(question.id, choice, question.solution)"
+            (click)="!showResults && selectGrammarAnswer(question.id, choice)"
           >
             <span class="choice-label">{{ getChoiceLabel(j) }}.</span>
             <span class="choice-text">{{ choice }}</span>
-            <mat-icon *ngIf="showAnswers && choice === question.solution" class="check-icon">
+            <mat-icon *ngIf="showResults && choice === question.solution" class="check-icon">
               check_circle
+            </mat-icon>
+            <mat-icon *ngIf="showResults && isGrammarChoiceSelected(question.id, choice) && choice !== question.solution" class="error-icon">
+              cancel
             </mat-icon>
           </div>
         </div>
 
-        <div *ngIf="showAnswers && question.explanation" class="explanation">
+        <div *ngIf="showResults && question.explanation" class="explanation">
           <mat-icon>lightbulb</mat-icon>
           <p>{{ question.explanation }}</p>
         </div>
@@ -1264,7 +1270,7 @@
 
       <!-- Botón para reintentar -->
       <button
-        *ngIf="showResults"
+        *ngIf="showResults && !isGrammarTest()"
         mat-raised-button
         color="accent"
         (click)="resetExercise()"
@@ -1273,15 +1279,26 @@
         Try Again
       </button>
 
-      <!-- Botón para mostrar/ocultar respuestas (Grammar Tests) -->
+      <!-- Botón para verificar respuestas (Grammar Tests) -->
       <button
         mat-raised-button
         color="primary"
-        (click)="toggleAnswers()"
+        (click)="showResults = true"
         *ngIf="isGrammarTest() && !showResults"
       >
-        <mat-icon>{{ showAnswers ? 'visibility_off' : 'visibility' }}</mat-icon>
-        {{ showAnswers ? 'Hide Answers' : 'Show Answers' }}
+        <mat-icon>check_circle</mat-icon>
+        Check Answers
+      </button>
+
+      <!-- Botón para reintentar (Grammar Tests) -->
+      <button
+        mat-raised-button
+        color="accent"
+        (click)="showResults = false; userAnswers = {}"
+        *ngIf="isGrammarTest() && showResults"
+      >
+        <mat-icon>refresh</mat-icon>
+        Try Again
       </button>
     </div>
 

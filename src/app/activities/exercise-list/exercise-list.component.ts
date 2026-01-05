@@ -95,6 +95,11 @@ export class ExerciseListComponent implements OnInit {
   }
 
   getExerciseTitle(exercise: Exercise, index: number): string {
+    // Grammar Tests usa el campo 'number' del payload
+    if (this.course?.toLowerCase() === 'grammar-tests' && exercise.payload?.number) {
+      return `Exercise ${exercise.payload.number}`;
+    }
+
     // Lista de actividades que deben mostrar "Exercise N" en la lista
     const activitiesWithNumbering = [
       'signs',

@@ -120,7 +120,28 @@ export class ActivitiesService {
           const groups = new Map<string, number>();
 
           docs.forEach((doc) => {
-            // Extraer el grupo del relpath si group no es un string válido
+            // Para grammar-tests, usar una lógica diferente
+            if (course === 'grammar-tests') {
+              // grammar-tests/c2/expert/1.json -> grupo "Expert"
+              const parts = doc.relpath.split('/');
+              if (parts.length >= 4) {
+                const groupName = parts[2]; // "expert", "intermediate", "beginner"
+                // Capitalizar primera letra
+                const capitalizedGroup = groupName.charAt(0).toUpperCase() + groupName.slice(1);
+
+                // Solo contar archivos que son ejercicios (números o con 'questions' en el nombre del archivo)
+                const filename = doc.filename.toLowerCase();
+                const isExerciseFile = /^\d+\.json$/.test(doc.filename) || filename.includes('questions');
+
+                if (isExerciseFile && !filename.includes('index') && !filename.includes('quantities')) {
+                  const count = groups.get(capitalizedGroup) || 0;
+                  groups.set(capitalizedGroup, count + 1);
+                }
+              }
+              return;
+            }
+
+            // Lógica original para otros cursos
             let groupName = '';
 
             if (doc.group && typeof doc.group === 'string') {
@@ -202,8 +223,27 @@ export class ActivitiesService {
           // Filtrar en memoria para evitar índices compuestos
           const items: Exercise[] = docs
             .filter((doc) => {
-              // Verificar que el relpath coincida con la actividad
               const parts = doc.relpath.split('/');
+
+              // Para grammar-tests: grammar-tests/c2/expert/1.json
+              if (course === 'grammar-tests') {
+                if (parts.length < 4) return false;
+                const groupName = parts[2]; // "expert", "intermediate", "beginner"
+                const capitalizedGroup = groupName.charAt(0).toUpperCase() + groupName.slice(1);
+                const groupSlug = groupName.toLowerCase().replace(/\s+/g, '-');
+
+                const matches = capitalizedGroup === activity ||
+                               groupSlug === activityNormalized ||
+                               groupName === activity.toLowerCase();
+
+                // Solo archivos meta.json (que contienen el ID del ejercicio)
+                const isMetaFile = doc.filename === 'meta.json';
+                const hasValidData = doc.data && (doc.data.id || doc.data.number);
+
+                return matches && isMetaFile && hasValidData;
+              }
+
+              // Lógica original para otros cursos
               const groupName = parts[2] || '';
               const groupSlug = groupName.toLowerCase().replace(/\s+/g, '-');
 
@@ -226,7 +266,16 @@ export class ActivitiesService {
                      !isBareExercise &&
                      !isListExercise;
             })
-            .sort((a, b) => a.filename.localeCompare(b.filename, undefined, { numeric: true }))
+            .sort((a, b) => {
+              // Para grammar-tests, ordenar por el campo 'number' del payload
+              if (course === 'grammar-tests') {
+                const numA = a.data?.number || 0;
+                const numB = b.data?.number || 0;
+                return numA - numB;
+              }
+              // Para otros cursos, ordenar por nombre de archivo
+              return a.filename.localeCompare(b.filename, undefined, { numeric: true });
+            })
             .slice(0, limit)
             .map((doc) => {
               // Usar el campo 'id' del JSON si existe, sino extraer del filename
@@ -280,7 +329,48 @@ export class ActivitiesService {
       .valueChanges()
       .pipe(
         map((docs) => {
-          // Filtrar por activity (comparando slug) y el campo 'id' del JSON
+          // Para grammar-tests, buscar el meta.json y questions.json
+          if (course === 'grammar-tests') {
+            // Buscar el meta.json que contiene el ID
+            const metaDoc = docs.find((d) => {
+              const parts = d.relpath.split('/');
+              const groupName = parts[2] || '';
+              const groupSlug = groupName.toLowerCase().replace(/\s+/g, '-');
+              const activityMatches = groupSlug === activityNormalized || groupName === activity;
+              const docId = d.data?.id?.toString();
+              const idMatches = docId === exerciseId;
+              const isMeta = d.filename === 'meta.json';
+
+              return activityMatches && idMatches && isMeta;
+            });
+
+            if (!metaDoc) {
+              throw new Error(`No se encontró el ejercicio: ${course}/${level}/${activity}/${exerciseId}`);
+            }
+
+            // Buscar el questions.json en la misma carpeta
+            const folderPath = metaDoc.relpath.substring(0, metaDoc.relpath.lastIndexOf('/'));
+            const questionsDoc = docs.find((d) =>
+              d.relpath.startsWith(folderPath) && d.filename === 'questions.json'
+            );
+
+            // Combinar meta y questions
+            const payload = {
+              ...metaDoc.data,
+              questions: questionsDoc?.data || []
+            };
+
+            return {
+              id: exerciseId,
+              course,
+              level,
+              activity,
+              relpath: metaDoc.relpath,
+              payload,
+            };
+          }
+
+          // Lógica original para otros cursos
           const doc = docs.find((d) => {
             const parts = d.relpath.split('/');
             const groupName = parts[2] || '';
@@ -292,7 +382,9 @@ export class ActivitiesService {
             const idMatches = docId === exerciseId;
 
             return activityMatches && idMatches;
-          });          if (!doc) {
+          });
+
+          if (!doc) {
             throw new Error(`No se encontró el ejercicio: ${course}/${level}/${activity}/${exerciseId}`);
           }
 
