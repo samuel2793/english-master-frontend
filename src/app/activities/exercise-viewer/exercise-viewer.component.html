@@ -92,7 +92,7 @@
       </div>
     </div>
 
-    <!-- Writing - Essay (two perspectives) -->
+    <!-- Writing - Essay C2 (two perspectives) -->
     <div *ngIf="isWriting() && exercise.payload?.payload?.title1 && exercise.payload?.payload?.title2" class="writing-essay">
       <div class="essay-perspectives">
         <div class="perspective-card">
@@ -112,8 +112,105 @@
       </div>
     </div>
 
+    <!-- Writing - Essay C1 (panel with opinions) -->
+    <div *ngIf="isWriting() && exercise.payload?.payload?.headline && exercise.payload?.payload?.opinions" class="writing-essay-c1">
+      <div *ngIf="exercise.payload.payload.notice" class="essay-notice">
+        <p>{{ exercise.payload.payload.notice }}</p>
+      </div>
+
+      <div class="essay-headline">
+        <h3>{{ exercise.payload.payload.headline }}</h3>
+      </div>
+
+      <div *ngIf="exercise.payload.payload.closure" class="essay-closure">
+        <p>{{ exercise.payload.payload.closure }}</p>
+      </div>
+
+      <div *ngIf="exercise.payload.payload.opinions && exercise.payload.payload.opinions.length > 0" class="essay-opinions">
+        <div *ngFor="let opinion of exercise.payload.payload.opinions" class="opinion-item">
+          <mat-icon>format_quote</mat-icon>
+          <p>{{ opinion }}</p>
+        </div>
+      </div>
+
+      <div *ngIf="exercise.payload.payload.points && exercise.payload.payload.points.length > 0" class="essay-points">
+        <h4>Points to consider:</h4>
+        <ul>
+          <li *ngFor="let point of exercise.payload.payload.points">{{ point }}</li>
+        </ul>
+      </div>
+
+      <div class="writing-instructions">
+        <mat-icon>edit</mat-icon>
+        <p>Write your essay discussing the points and giving your opinion. (Write 220-260 words)</p>
+      </div>
+    </div>
+
+    <!-- Writing - Report/Review/Letter/Article (single text instruction) -->
+    <div *ngIf="isWriting() && exercise.payload?.payload && !exercise.payload?.payload?.title1 && !exercise.payload?.payload?.headline &&
+                (exercise.payload.payload.text || exercise.payload.payload.notice || exercise.payload.payload.subject || exercise.payload.payload.points)" class="writing-report">
+      <div class="report-type-badge">
+        <mat-icon>description</mat-icon>
+        <span>{{ exercise.payload.payload.type || 'Writing Task' }}</span>
+      </div>
+
+      <!-- Notice (para Article y Review) -->
+      <div *ngIf="exercise.payload.payload.notice" class="report-notice">
+        <p>{{ exercise.payload.payload.notice }}</p>
+      </div>
+
+      <!-- Subject (para Review/Proposal C1) -->
+      <div *ngIf="exercise.payload.payload.subject" class="report-subject">
+        <h4>{{ exercise.payload.payload.subject }}</h4>
+      </div>
+
+      <!-- Topic (para Article) -->
+      <div *ngIf="exercise.payload.payload.topic" class="report-topic">
+        <h3>{{ exercise.payload.payload.topic }}</h3>
+      </div>
+
+      <!-- Info (para Article) -->
+      <div *ngIf="exercise.payload.payload.info" class="report-info">
+        <p>{{ exercise.payload.payload.info }}</p>
+      </div>
+
+      <!-- Question (para Review) -->
+      <div *ngIf="exercise.payload.payload.question" class="report-question">
+        <h4>{{ exercise.payload.payload.question }}</h4>
+      </div>
+
+      <!-- Points (lista de puntos para C1) -->
+      <div *ngIf="exercise.payload.payload.points && exercise.payload.payload.points.length > 0" class="report-points-list">
+        <div *ngFor="let point of exercise.payload.payload.points; let i = index" class="point-item">
+          <span class="point-number">{{ i + 1 }}</span>
+          <p>{{ point }}</p>
+        </div>
+      </div>
+
+      <!-- Instructions o Point -->
+      <div *ngIf="exercise.payload.payload.instructions || exercise.payload.payload.point" class="report-instructions">
+        <p>{{ exercise.payload.payload.instructions || exercise.payload.payload.point }}</p>
+      </div>
+
+      <!-- Text (para Report/Letter/Proposal simple) -->
+      <div *ngIf="exercise.payload.payload.text && !exercise.payload.payload.points" class="report-instructions">
+        <p>{{ exercise.payload.payload.text }}</p>
+      </div>
+
+      <!-- Closure (texto final para C1) -->
+      <div *ngIf="exercise.payload.payload.closure" class="report-closure">
+        <mat-icon>info</mat-icon>
+        <p>{{ exercise.payload.payload.closure }}</p>
+      </div>
+
+      <div class="writing-instructions">
+        <mat-icon>edit</mat-icon>
+        <p>Write 220-260 words.</p>
+      </div>
+    </div>
+
     <!-- Writing - Generic (other types) -->
-    <div *ngIf="isWriting() && exercise.payload && !exercise.payload?.payload?.title1 && !exercise.payload?.payload?.title2" class="writing-exercise">
+    <div *ngIf="isWriting() && exercise.payload && !exercise.payload?.payload?.title1 && !exercise.payload?.payload?.text" class="writing-exercise">
       <div *ngIf="exercise.payload.opening" class="writing-section">
         <h3>Opening</h3>
         <p>{{ exercise.payload.opening }}</p>
