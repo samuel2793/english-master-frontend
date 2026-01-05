@@ -259,13 +259,15 @@ export class ActivitiesService {
                                     title.toLowerCase() === 'exercise list' ||
                                     doc.filename.toLowerCase().includes('list');
 
-              // Para Writing, filtrar ejercicios que no tienen payload anidado (son metadatos)
+              // Para Writing, filtrar archivos de metadatos/índice que no son ejercicios reales
+              // Los ejercicios reales tienen 'payload' o campos de contenido directo (text1, title1, etc.)
               const isWritingMetadata = course === 'writing' &&
                                        doc.data &&
                                        !doc.data.payload &&
-                                       (doc.data.name || doc.data.slug) &&
                                        !doc.data.text1 &&
-                                       !doc.data.title1;
+                                       !doc.data.title1 &&
+                                       !doc.data.type &&
+                                       (doc.data.name || doc.data.slug);
 
               return matches &&
                      !doc.filename.includes('index') &&
