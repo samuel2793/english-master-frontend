@@ -133,18 +133,22 @@ export class ActivitiesService {
               }
             }
 
-            // Filtrar Exercise bare
+            // Filtrar Exercise bare y Exercise list
             const title = doc.data?.title || '';
             const isBareExercise = title.toLowerCase().includes('exercise bare') ||
                                   title.toLowerCase() === 'bare' ||
                                   doc.filename.toLowerCase().includes('bare');
+            const isListExercise = title.toLowerCase().includes('exercise list') ||
+                                  title.toLowerCase() === 'exercise list' ||
+                                  doc.filename.toLowerCase().includes('list');
 
             // Filtrar archivos de índice y cantidades
             if (groupName &&
                 !doc.filename.includes('index') &&
                 !doc.filename.includes('quantities') &&
                 !doc.filename.includes('activities') &&
-                !isBareExercise) {
+                !isBareExercise &&
+                !isListExercise) {
               const count = groups.get(groupName) || 0;
               groups.set(groupName, count + 1);
             }
@@ -206,17 +210,21 @@ export class ActivitiesService {
               // Comparar tanto por nombre exacto como por slug
               const matches = groupName === activity || groupSlug === activityNormalized;
 
-              // Filtrar "Exercise bare" o ejercicios sin título válido
+              // Filtrar "Exercise bare" y "Exercise list" o ejercicios sin título válido
               const title = doc.data?.title || '';
               const isBareExercise = title.toLowerCase().includes('exercise bare') ||
                                     title.toLowerCase() === 'bare' ||
                                     doc.filename.toLowerCase().includes('bare');
+              const isListExercise = title.toLowerCase().includes('exercise list') ||
+                                    title.toLowerCase() === 'exercise list' ||
+                                    doc.filename.toLowerCase().includes('list');
 
               return matches &&
                      !doc.filename.includes('index') &&
                      !doc.filename.includes('quantities') &&
                      !doc.filename.includes('activities') &&
-                     !isBareExercise;
+                     !isBareExercise &&
+                     !isListExercise;
             })
             .sort((a, b) => a.filename.localeCompare(b.filename, undefined, { numeric: true }))
             .slice(0, limit)

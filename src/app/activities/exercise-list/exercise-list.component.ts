@@ -95,8 +95,20 @@ export class ExerciseListComponent implements OnInit {
   }
 
   getExerciseTitle(exercise: Exercise, index: number): string {
-    // Para "matching" (no "multiple-matching") y "signs", siempre mostrar "Exercise N"
-    if (this.activity?.toLowerCase() === 'matching' || this.activity?.toLowerCase() === 'signs') {
+    // Lista de actividades que deben mostrar "Exercise N" en la lista
+    const activitiesWithNumbering = [
+      'matching',
+      'signs',
+      'extracts',
+      'gapped-text',
+      'multiple-choice',
+      'multiple-matching',
+      'pictures'
+    ];
+
+    const activityLower = this.activity?.toLowerCase() || '';
+
+    if (activitiesWithNumbering.includes(activityLower)) {
       return `Exercise ${index + 1}`;
     }
     // Para otros ejercicios, usar el título del payload o el ID

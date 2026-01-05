@@ -79,8 +79,8 @@ export class ExerciseViewerComponent implements OnInit {
 
     this.exercise$.subscribe((exercise) => {
       this.loading = false;
-      // Aleatorizar opciones para Missing Paragraphs/Sentences
-      if (exercise?.payload?.choices) {
+      // Aleatorizar opciones para Missing Paragraphs/Sentences (solo si choices es un array)
+      if (exercise?.payload?.choices && Array.isArray(exercise.payload.choices)) {
         this.shuffledChoices = this.shuffleAndRelabelChoices([...exercise.payload.choices]);
       }
       // Aleatorizar respuestas para Long Text
@@ -187,8 +187,20 @@ export class ExerciseViewerComponent implements OnInit {
   }
 
   getExerciseDisplayTitle(exercise: Exercise): string {
-    // Para "matching" (no "multiple-matching") y "signs", siempre mostrar solo "Exercise"
-    if ((this.activity?.toLowerCase() === 'matching' || this.activity?.toLowerCase() === 'signs')) {
+    // Lista de actividades que deben mostrar solo "Exercise" dentro del ejercicio
+    const activitiesWithSimpleTitle = [
+      'matching',
+      'signs',
+      'extracts',
+      'gapped-text',
+      'multiple-choice',
+      'multiple-matching',
+      'pictures'
+    ];
+
+    const activityLower = this.activity?.toLowerCase() || '';
+
+    if (activitiesWithSimpleTitle.includes(activityLower)) {
       return 'Exercise';
     }
     // Para otros ejercicios, usar el título del payload o "Exercise + ID"
@@ -499,6 +511,30 @@ export class ExerciseViewerComponent implements OnInit {
   getImageByKey(images: any[], key: string): string {
     const image = images?.find(img => img.key?.toString() === key);
     return image ? image.value : '';
+  }
+
+  // Método para obtener las opciones de Listening Extracts
+  getExtractChoices(choicesText: string): string[] {
+    if (!choicesText) return [];
+    return choicesText.split('//').map(c => c.trim());
+  }
+
+  // Métodos para agrupar preguntas por extractos
+  groupQuestionsByExtracts(questions: any, headline?: string): any[] {
+    const questionKeys = this.getObjectKeys(questions);
+    const extracts = headline ? headline.split('//').map(e => e.trim()) : [];
+    const questionsPerExtract = extracts.length > 0 ? Math.ceil(questionKeys.length / extracts.length) : questionKeys.length;
+
+    const groups = [];
+    for (let i = 0; i < questionKeys.length; i += questionsPerExtract) {
+      const groupKeys = questionKeys.slice(i, i + questionsPerExtract);
+      const extractIndex = Math.floor(i / questionsPerExtract);
+      groups.push({
+        extract: extracts[extractIndex] || null,
+        questionKeys: groupKeys
+      });
+    }
+    return groups;
   }
 
   // Métodos para ejercicios de Matching (personas con opciones)
