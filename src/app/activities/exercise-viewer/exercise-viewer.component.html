@@ -197,7 +197,7 @@
     </div>
 
     <!-- Listening Extracts (audio con preguntas y opciones múltiples) -->
-    <div *ngIf="exercise.payload.audio" class="extracts-section">
+    <div *ngIf="exercise.payload.audio && exercise.payload.questions && exercise.payload.choices" class="extracts-section">
       <!-- Reproductor de audio -->
       <div class="audio-player">
         <audio controls [src]="exercise.payload.audio">
@@ -255,6 +255,64 @@
       </div>
 
       <!-- Fallback: mostrar JSON crudo si no encaja en ningún patrón -->
+      <details class="raw-data" *ngIf="isAdmin">
+        <summary>View Raw Data</summary>
+        <pre>{{ formatJson(exercise.payload) }}</pre>
+      </details>
+    </div>
+
+    <!-- Listening Gapped Text (audio + texto con huecos para rellenar) -->
+    <div *ngIf="exercise.payload.audio && exercise.payload.text && exercise.payload.solutions && !exercise.payload.questions" class="gapped-text-section">
+      <!-- Instrucciones -->
+      <div *ngIf="exercise.payload.headline" class="instructions">
+        <mat-icon>info</mat-icon>
+        <p>{{ exercise.payload.headline }}</p>
+      </div>
+
+      <!-- Reproductor de audio -->
+      <div class="audio-player">
+        <audio controls [src]="exercise.payload.audio">
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+
+      <!-- Texto con huecos para completar -->
+      <div class="gapped-text-content">
+        <ng-container *ngFor="let line of gappedTextLines">
+          <p class="text-line">
+            <ng-container *ngFor="let segment of line.segments">
+              <span *ngIf="segment.type === 'text'">{{ segment.content }}</span>
+              <span *ngIf="segment.type === 'gap'" class="gap-input-wrapper">
+                <span class="gap-number">({{ segment.gapNumber }})</span>
+                <input
+                  type="text"
+                  class="gap-input"
+                  [class.correct]="showResults && isGapCorrect(segment.gapNumber, exercise.payload.solutions)"
+                  [class.incorrect]="showResults && userAnswers[segment.gapNumber] && !isGapCorrect(segment.gapNumber, exercise.payload.solutions)"
+                  [(ngModel)]="userAnswers[segment.gapNumber]"
+                  [disabled]="showResults"
+                  placeholder="..........."
+                />
+                <!-- Mostrar respuesta correcta si está mal -->
+                <span *ngIf="showResults && userAnswers[segment.gapNumber] && !isGapCorrect(segment.gapNumber, exercise.payload.solutions)" class="correct-answer-hint">
+                  ✓ {{ exercise.payload.solutions[segment.gapNumber] }}
+                </span>
+              </span>
+            </ng-container>
+          </p>
+        </ng-container>
+      </div>
+
+      <!-- Resultados -->
+      <div *ngIf="showResults && exercise.payload.solutions" class="results-summary">
+        <mat-icon>{{ getGappedTextCorrectCount(exercise.payload.solutions) === getObjectKeys(exercise.payload.solutions).length ? 'check_circle' : 'pending' }}</mat-icon>
+        <p>
+          You got <strong>{{ getGappedTextCorrectCount(exercise.payload.solutions) }}</strong> out of
+          <strong>{{ getObjectKeys(exercise.payload.solutions).length }}</strong> correct!
+        </p>
+      </div>
+
+      <!-- Raw data para admin -->
       <details class="raw-data" *ngIf="isAdmin">
         <summary>View Raw Data</summary>
         <pre>{{ formatJson(exercise.payload) }}</pre>
@@ -543,6 +601,18 @@
       <!-- Botón para verificar respuestas (Listening Extracts) -->
       <button
         *ngIf="exercise.payload.audio && exercise.payload.questions && exercise.payload.solutions && !showResults && !exercise.payload.compact_questions"
+        mat-raised-button
+        color="primary"
+        (click)="checkAnswers()"
+        [disabled]="getObjectKeys(userAnswers).length === 0"
+      >
+        <mat-icon>check</mat-icon>
+        Check Answers
+      </button>
+
+      <!-- Botón para verificar respuestas (Listening Gapped Text) -->
+      <button
+        *ngIf="exercise.payload.audio && exercise.payload.text && exercise.payload.solutions && !exercise.payload.questions && !showResults"
         mat-raised-button
         color="primary"
         (click)="checkAnswers()"

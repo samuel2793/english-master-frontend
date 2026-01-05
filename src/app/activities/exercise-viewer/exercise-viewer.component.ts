@@ -33,6 +33,7 @@ export class ExerciseViewerComponent implements OnInit {
   selectedGap: string | null = null; // Gap seleccionado para Missing Paragraphs
   shuffledChoices: any[] = []; // Opciones aleatorizadas para Missing Paragraphs
   shuffledAnswers: { [questionKey: string]: string[] } = {}; // Respuestas aleatorizadas para Long Text
+  gappedTextLines: any[] = []; // Líneas procesadas para Gapped Text (cacheadas)
   isAdmin = false;
 
   constructor(
@@ -86,6 +87,10 @@ export class ExerciseViewerComponent implements OnInit {
       // Aleatorizar respuestas para Long Text
       if (exercise?.payload?.compact_answers) {
         this.shuffledAnswers = this.shuffleCompactAnswers(exercise.payload.compact_answers);
+      }
+      // Procesar líneas para Gapped Text (cachear para evitar recalcular)
+      if (exercise?.payload?.text && exercise?.payload?.audio && exercise?.payload?.solutions && !exercise?.payload?.questions) {
+        this.gappedTextLines = this.processGappedTextLines(exercise.payload.text);
       }
     });
   }
@@ -192,7 +197,6 @@ export class ExerciseViewerComponent implements OnInit {
       'matching',
       'signs',
       'extracts',
-      'gapped-text',
       'multiple-choice',
       'multiple-matching',
       'pictures'
@@ -578,5 +582,75 @@ export class ExerciseViewerComponent implements OnInit {
     if (!solutions) return null;
     const solution = solutions.find(s => s.person === personName);
     return solution ? solution.title : null;
+  }
+
+  // Funciones para Gapped Text
+  processGappedTextLines(text: string): any[] {
+    const lines = text.split('\n');
+    return lines.map(line => {
+      const segments: any[] = [];
+      // Patrón para detectar huecos: (1) ..., (2) ..., etc.
+      const gapPattern = /\((\d+)\)\s*\.{3,}/g;
+      let lastIndex = 0;
+      let match;
+
+      while ((match = gapPattern.exec(line)) !== null) {
+        // Agregar texto antes del hueco
+        if (match.index > lastIndex) {
+          segments.push({
+            type: 'text',
+            content: line.substring(lastIndex, match.index)
+          });
+        }
+
+        // Agregar el hueco
+        segments.push({
+          type: 'gap',
+          gapNumber: match[1]
+        });
+
+        lastIndex = match.index + match[0].length;
+      }
+
+      // Agregar el texto restante después del último hueco
+      if (lastIndex < line.length) {
+        segments.push({
+          type: 'text',
+          content: line.substring(lastIndex)
+        });
+      }
+
+      return { segments };
+    });
+  }
+
+  isGapCorrect(gapNumber: string, solutions?: any): boolean {
+    if (!solutions) return false;
+
+    const userAnswer = this.userAnswers[gapNumber]?.trim().toLowerCase();
+    if (!userAnswer) return false;
+
+    const correctAnswer = solutions[gapNumber]?.trim().toLowerCase();
+    if (!correctAnswer) return false;
+
+    // Si la respuesta correcta contiene "/", significa que cualquiera de las opciones es válida
+    if (correctAnswer.includes('/')) {
+      const validAnswers = correctAnswer.split('/').map(ans => ans.trim());
+      return validAnswers.some(validAns => userAnswer === validAns);
+    }
+
+    // Si no hay "/", comparación directa
+    return userAnswer === correctAnswer;
+  }
+
+  getGappedTextCorrectCount(solutions: any): number {
+    if (!solutions) return 0;
+    let count = 0;
+    for (const key of Object.keys(solutions)) {
+      if (this.isGapCorrect(key, solutions)) {
+        count++;
+      }
+    }
+    return count;
   }
 }

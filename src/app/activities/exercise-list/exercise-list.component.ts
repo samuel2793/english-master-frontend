@@ -100,7 +100,6 @@ export class ExerciseListComponent implements OnInit {
       'matching',
       'signs',
       'extracts',
-      'gapped-text',
       'multiple-choice',
       'multiple-matching',
       'pictures'

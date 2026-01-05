@@ -10,7 +10,7 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer }     from '@angular/platform-browser';
 import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatCardModule }       from '@angular/material/card';
 import { MatFormFieldModule }  from '@angular/material/form-field';
 import { MatInputModule }      from '@angular/material/input';
@@ -57,6 +57,7 @@ import { ExerciseViewerComponent } from './activities/exercise-viewer/exercise-v
     MatIconModule,
     MatToolbarModule,
     ReactiveFormsModule,
+    FormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
