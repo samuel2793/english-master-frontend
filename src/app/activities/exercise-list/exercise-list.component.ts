@@ -100,6 +100,11 @@ export class ExerciseListComponent implements OnInit {
       return `Exercise ${exercise.payload.number}`;
     }
 
+    // Writing siempre usa numeración
+    if (this.course?.toLowerCase() === 'writing') {
+      return `Exercise ${index + 1}`;
+    }
+
     // Lista de actividades que deben mostrar "Exercise N" en la lista
     const activitiesWithNumbering = [
       'signs',

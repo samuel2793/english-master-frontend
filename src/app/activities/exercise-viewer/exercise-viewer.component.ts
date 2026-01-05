@@ -214,8 +214,8 @@ export class ExerciseViewerComponent implements OnInit {
   }
 
   getExerciseDisplayTitle(exercise: Exercise): string {
-    // Grammar Tests siempre muestra solo "Exercise"
-    if (this.course?.toLowerCase() === 'grammar-tests') {
+    // Grammar Tests y Writing siempre muestran solo "Exercise"
+    if (this.course?.toLowerCase() === 'grammar-tests' || this.course?.toLowerCase() === 'writing') {
       return 'Exercise';
     }
 
