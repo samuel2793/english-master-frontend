@@ -676,4 +676,38 @@ export class ExerciseViewerComponent implements OnInit {
 
     return count;
   }
+
+  // Funciones para Listening Pictures
+  getPictureChoices(choicesString: string): string[] {
+    // Dividir por "/" para obtener las 3 opciones de imagen
+    return choicesString.split('/').map(choice => choice.trim());
+  }
+
+  getPictureUrl(basePath: string, imageKey: string): string {
+    // Construir la URL completa de la imagen
+    // imageKey tiene formato "9_1_1", la URL final es "base_path/9_1_1.jpeg"
+    return `${basePath}/${imageKey}.jpeg`;
+  }
+
+  getPictureLabel(imageKey: string): string {
+    // Extraer la última parte del key para mostrar la letra (1=A, 2=B, 3=C)
+    const parts = imageKey.split('_');
+    const lastPart = parseInt(parts[parts.length - 1]);
+    return String.fromCharCode(64 + lastPart); // 1=A, 2=B, 3=C
+  }
+
+  selectPictureAnswer(questionKey: string, imageKey: string): void {
+    this.userAnswers[questionKey] = imageKey;
+  }
+
+  getPicturesCorrectCount(solutions: any): number {
+    if (!solutions) return 0;
+    let count = 0;
+    for (const key of Object.keys(solutions)) {
+      if (this.userAnswers[key] === solutions[key]) {
+        count++;
+      }
+    }
+    return count;
+  }
 }
