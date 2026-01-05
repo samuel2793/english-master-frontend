@@ -401,13 +401,19 @@ export class ActivitiesService {
             throw new Error('Archivo almacenado en Storage, no implementado aún');
           }
 
+          // Para Writing, verificar si el payload está anidado
+          let payload = doc.data || {};
+          if (course === 'writing' && doc.data?.payload) {
+            payload = doc.data.payload;
+          }
+
           return {
             id: exerciseId,
             course,
             level,
             activity,
             relpath: doc.relpath,
-            payload: doc.data || {},
+            payload,
           };
         }),
         catchError((error) => {

@@ -466,6 +466,147 @@
   }
 }
 
+// Writing - Email B1
+.writing-email-b1 {
+  .email-header {
+    margin-bottom: 24px;
+
+    .email-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-weight: 600;
+      font-size: 15px;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .email-meta {
+      padding: 16px;
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+      border-radius: 6px;
+
+      .email-from,
+      .email-subject {
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: #495057;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        strong {
+          color: #2c3e50;
+          font-weight: 600;
+          margin-right: 8px;
+        }
+      }
+    }
+  }
+
+  .email-body {
+    padding: 20px;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    margin-bottom: 20px;
+
+    .email-opening {
+      margin-bottom: 16px;
+
+      p {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 15px;
+        font-weight: 500;
+      }
+    }
+
+    .email-paragraphs {
+      .email-paragraph {
+        margin-bottom: 20px;
+        padding: 16px;
+        background: rgba(102, 126, 234, 0.05);
+        border-radius: 6px;
+        border-left: 3px solid #667eea;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .paragraph-text {
+          margin: 0 0 8px 0;
+          color: #2c3e50;
+          font-size: 15px;
+          line-height: 1.7;
+        }
+
+        .paragraph-note {
+          display: inline-block;
+          padding: 4px 12px;
+          background: #fff3cd;
+          color: #856404;
+          border-radius: 4px;
+          font-size: 13px;
+          font-style: italic;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .email-closure {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #e9ecef;
+
+      p {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 15px;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .writing-instructions {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-radius: 8px;
+    border: 2px solid #667eea;
+
+    mat-icon {
+      color: #667eea;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.6;
+      color: #2c3e50;
+      font-size: 15px;
+      font-weight: 500;
+    }
+  }
+}
+
 // Writing - Essay B2 (simple format)
 .writing-essay-b2 {
   .essay-notice {

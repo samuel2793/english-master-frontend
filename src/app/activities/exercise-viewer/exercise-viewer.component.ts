@@ -80,6 +80,7 @@ export class ExerciseViewerComponent implements OnInit {
 
     this.exercise$.subscribe((exercise) => {
       this.loading = false;
+
       // Aleatorizar opciones para Missing Paragraphs/Sentences (solo si choices es un array)
       if (exercise?.payload?.choices && Array.isArray(exercise.payload.choices)) {
         this.shuffledChoices = this.shuffleAndRelabelChoices([...exercise.payload.choices]);

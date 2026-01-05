@@ -146,6 +146,47 @@
       </div>
     </div>
 
+    <!-- Writing - Email B1 (email format with paragraphs) - MUST BE BEFORE GENERIC -->
+    <div *ngIf="isWriting() && exercise.payload?.type === 'Email' && exercise.payload?.from && exercise.payload?.paragraphs && exercise.payload.paragraphs.length > 0" class="writing-email-b1">
+      <div class="email-header">
+        <div class="email-badge">
+          <mat-icon>email</mat-icon>
+          <span>{{ exercise.payload.type || 'Email' }}</span>
+        </div>
+
+        <div class="email-meta">
+          <div class="email-from">
+            <strong>From:</strong> {{ exercise.payload.from }}
+          </div>
+          <div *ngIf="exercise.payload.subject" class="email-subject">
+            <strong>Subject:</strong> {{ exercise.payload.subject }}
+          </div>
+        </div>
+      </div>
+
+      <div class="email-body">
+        <div *ngIf="exercise.payload.opening" class="email-opening">
+          <p>{{ exercise.payload.opening }}</p>
+        </div>
+
+        <div class="email-paragraphs">
+          <div *ngFor="let paragraph of exercise.payload.paragraphs" class="email-paragraph">
+            <p class="paragraph-text">{{ paragraph.text }}</p>
+            <span *ngIf="paragraph.note" class="paragraph-note">{{ paragraph.note }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="exercise.payload.closure" class="email-closure">
+          <p>{{ exercise.payload.closure }}</p>
+        </div>
+      </div>
+
+      <div class="writing-instructions">
+        <mat-icon>edit</mat-icon>
+        <p>Write your reply. (Write 100-120 words)</p>
+      </div>
+    </div>
+
     <!-- Writing - Essay B2 (simple headline with points, NOT Report/Review/Letter/Article) -->
     <div *ngIf="isWriting() && exercise.payload?.payload?.headline && !exercise.payload?.payload?.opinions && exercise.payload?.payload?.points && !exercise.payload?.payload?.type" class="writing-essay-b2">
       <div *ngIf="exercise.payload.payload.notice" class="essay-notice">
@@ -253,8 +294,8 @@
       </div>
     </div>
 
-    <!-- Writing - Generic (other types) -->
-    <div *ngIf="isWriting() && exercise.payload && !exercise.payload?.payload?.title1 && !exercise.payload?.payload?.text" class="writing-exercise">
+    <!-- Writing - Generic (other types, exclude B1 Email and nested payload structures) -->
+    <div *ngIf="isWriting() && exercise.payload && !exercise.payload?.payload?.title1 && !exercise.payload?.payload?.text && exercise.payload?.type !== 'Email'" class="writing-exercise">
       <div *ngIf="exercise.payload.opening" class="writing-section">
         <h3>Opening</h3>
         <p>{{ exercise.payload.opening }}</p>
