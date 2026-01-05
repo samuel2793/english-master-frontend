@@ -194,11 +194,9 @@ export class ExerciseViewerComponent implements OnInit {
   getExerciseDisplayTitle(exercise: Exercise): string {
     // Lista de actividades que deben mostrar solo "Exercise" dentro del ejercicio
     const activitiesWithSimpleTitle = [
-      'matching',
       'signs',
       'extracts',
       'multiple-choice',
-      'multiple-matching',
       'pictures'
     ];
 
@@ -651,6 +649,31 @@ export class ExerciseViewerComponent implements OnInit {
         count++;
       }
     }
+    return count;
+  }
+
+  // Funciones para Multiple Matching
+  getMultipleMatchingCorrectCount(solutions1: any, solutions2: any): number {
+    let count = 0;
+
+    // Contar correctas de task 1
+    if (solutions1) {
+      for (const key of Object.keys(solutions1)) {
+        if (this.userAnswers['task1_' + key] === solutions1[key]) {
+          count++;
+        }
+      }
+    }
+
+    // Contar correctas de task 2
+    if (solutions2) {
+      for (const key of Object.keys(solutions2)) {
+        if (this.userAnswers['task2_' + key] === solutions2[key]) {
+          count++;
+        }
+      }
+    }
+
     return count;
   }
 }

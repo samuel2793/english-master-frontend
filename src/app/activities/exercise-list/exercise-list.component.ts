@@ -97,11 +97,9 @@ export class ExerciseListComponent implements OnInit {
   getExerciseTitle(exercise: Exercise, index: number): string {
     // Lista de actividades que deben mostrar "Exercise N" en la lista
     const activitiesWithNumbering = [
-      'matching',
       'signs',
       'extracts',
       'multiple-choice',
-      'multiple-matching',
       'pictures'
     ];
 

@@ -381,6 +381,147 @@
       </details>
     </div>
 
+    <!-- Listening Matching (audio + matching de speakers con oraciones) -->
+    <div *ngIf="exercise.payload.audio && exercise.payload.sentences && exercise.payload.solutions && !exercise.payload.sentences_1 && !exercise.payload.sentences_2" class="matching-section">
+      <!-- Instrucciones -->
+      <div *ngIf="exercise.payload.headline" class="instructions">
+        <mat-icon>info</mat-icon>
+        <p>{{ exercise.payload.headline }}</p>
+      </div>
+
+      <!-- Reproductor de audio -->
+      <div class="audio-player">
+        <audio controls [src]="exercise.payload.audio">
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+
+      <!-- Speakers con matching -->
+      <div class="speakers-grid">
+        <div *ngFor="let key of getObjectKeys(exercise.payload.solutions)" class="speaker-item">
+          <h4>Speaker {{ key }}</h4>
+          <mat-form-field appearance="outline">
+            <mat-label>Select answer</mat-label>
+            <mat-select [(value)]="userAnswers[key]" [disabled]="showResults">
+              <mat-option *ngFor="let sentence of exercise.payload.sentences" [value]="sentence">
+                {{ sentence }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Feedback -->
+          <div *ngIf="showResults" class="feedback">
+            <div *ngIf="userAnswers[key] === exercise.payload.solutions[key]" class="correct-feedback">
+              <mat-icon>check_circle</mat-icon>
+              <span>Correct!</span>
+            </div>
+            <div *ngIf="userAnswers[key] && userAnswers[key] !== exercise.payload.solutions[key]" class="incorrect-feedback">
+              <mat-icon>cancel</mat-icon>
+              <span>Incorrect. Correct answer: {{ exercise.payload.solutions[key] }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div *ngIf="showResults && exercise.payload.solutions" class="results-summary">
+        <mat-icon>{{ getCorrectCount(exercise.payload.solutions) === getObjectKeys(exercise.payload.solutions).length ? 'check_circle' : 'pending' }}</mat-icon>
+        <p>
+          You got <strong>{{ getCorrectCount(exercise.payload.solutions) }}</strong> out of
+          <strong>{{ getObjectKeys(exercise.payload.solutions).length }}</strong> correct!
+        </p>
+      </div>
+    </div>
+
+    <!-- Listening Multiple Matching (audio + dos conjuntos de matching) -->
+    <div *ngIf="exercise.payload.audio && exercise.payload.sentences_1 && exercise.payload.sentences_2 && exercise.payload.solutions_1 && exercise.payload.solutions_2" class="multiple-matching-section">
+      <!-- Instrucciones -->
+      <div *ngIf="exercise.payload.headline" class="instructions">
+        <mat-icon>info</mat-icon>
+        <p>{{ exercise.payload.headline }}</p>
+      </div>
+
+      <!-- Reproductor de audio -->
+      <div class="audio-player">
+        <audio controls [src]="exercise.payload.audio">
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+
+      <!-- Primera tarea -->
+      <div class="matching-task">
+        <h3>Task 1</h3>
+        <p class="subtitle" *ngIf="exercise.payload.subtitle_1">{{ exercise.payload.subtitle_1 }}</p>
+
+        <div class="speakers-grid">
+          <div *ngFor="let key of getObjectKeys(exercise.payload.solutions_1)" class="speaker-item">
+            <h4>Speaker {{ key }}</h4>
+            <mat-form-field appearance="outline">
+              <mat-label>Select answer</mat-label>
+              <mat-select [(value)]="userAnswers['task1_' + key]" [disabled]="showResults">
+                <mat-option *ngFor="let sentence of exercise.payload.sentences_1" [value]="sentence">
+                  {{ sentence }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <!-- Feedback -->
+            <div *ngIf="showResults" class="feedback">
+              <div *ngIf="userAnswers['task1_' + key] === exercise.payload.solutions_1[key]" class="correct-feedback">
+                <mat-icon>check_circle</mat-icon>
+                <span>Correct!</span>
+              </div>
+              <div *ngIf="userAnswers['task1_' + key] && userAnswers['task1_' + key] !== exercise.payload.solutions_1[key]" class="incorrect-feedback">
+                <mat-icon>cancel</mat-icon>
+                <span>Incorrect. Correct answer: {{ exercise.payload.solutions_1[key] }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Segunda tarea -->
+      <div class="matching-task">
+        <h3>Task 2</h3>
+        <p class="subtitle" *ngIf="exercise.payload.subtitle_2">{{ exercise.payload.subtitle_2 }}</p>
+
+        <div class="speakers-grid">
+          <div *ngFor="let key of getObjectKeys(exercise.payload.solutions_2)" class="speaker-item">
+            <h4>Speaker {{ key }}</h4>
+            <mat-form-field appearance="outline">
+              <mat-label>Select answer</mat-label>
+              <mat-select [(value)]="userAnswers['task2_' + key]" [disabled]="showResults">
+                <mat-option *ngFor="let sentence of exercise.payload.sentences_2" [value]="sentence">
+                  {{ sentence }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <!-- Feedback -->
+            <div *ngIf="showResults" class="feedback">
+              <div *ngIf="userAnswers['task2_' + key] === exercise.payload.solutions_2[key]" class="correct-feedback">
+                <mat-icon>check_circle</mat-icon>
+                <span>Correct!</span>
+              </div>
+              <div *ngIf="userAnswers['task2_' + key] && userAnswers['task2_' + key] !== exercise.payload.solutions_2[key]" class="incorrect-feedback">
+                <mat-icon>cancel</mat-icon>
+                <span>Incorrect. Correct answer: {{ exercise.payload.solutions_2[key] }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div *ngIf="showResults" class="results-summary">
+        <mat-icon>{{ getMultipleMatchingCorrectCount(exercise.payload.solutions_1, exercise.payload.solutions_2) === (getObjectKeys(exercise.payload.solutions_1).length + getObjectKeys(exercise.payload.solutions_2).length) ? 'check_circle' : 'pending' }}</mat-icon>
+        <p>
+          You got <strong>{{ getMultipleMatchingCorrectCount(exercise.payload.solutions_1, exercise.payload.solutions_2) }}</strong> out of
+          <strong>{{ getObjectKeys(exercise.payload.solutions_1).length + getObjectKeys(exercise.payload.solutions_2).length }}</strong> correct!
+        </p>
+      </div>
+    </div>
+
     <!-- Listening / Reading / Use of English (Generic) -->
     <div
       *ngIf="!isGrammarTest() && !isSpeaking() && !isWriting() && !isMatching() && !exercise.payload.people && !exercise.payload.audio && exercise.payload"
@@ -648,6 +789,18 @@
         Check Answers
       </button>
 
+      <!-- Botón para verificar respuestas (Listening Matching) -->
+      <button
+        *ngIf="exercise.payload.audio && exercise.payload.sentences && exercise.payload.solutions && !exercise.payload.sentences_1 && !exercise.payload.sentences_2 && !showResults"
+        mat-raised-button
+        color="primary"
+        (click)="checkAnswers()"
+        [disabled]="getObjectKeys(userAnswers).length === 0"
+      >
+        <mat-icon>check</mat-icon>
+        Check Answers
+      </button>
+
       <!-- Botón para verificar respuestas (Signs) -->
       <button
         *ngIf="(exercise.payload.compact_images || exercise.payload.images) && exercise.payload.compact_choices && exercise.payload.compact_solutions && !showResults"
@@ -687,6 +840,18 @@
       <!-- Botón para verificar respuestas (Listening Gapped Text) -->
       <button
         *ngIf="exercise.payload.audio && exercise.payload.text && exercise.payload.solutions && !exercise.payload.questions && !showResults"
+        mat-raised-button
+        color="primary"
+        (click)="checkAnswers()"
+        [disabled]="getObjectKeys(userAnswers).length === 0"
+      >
+        <mat-icon>check</mat-icon>
+        Check Answers
+      </button>
+
+      <!-- Botón para verificar respuestas (Listening Multiple Matching) -->
+      <button
+        *ngIf="exercise.payload.audio && exercise.payload.sentences_1 && exercise.payload.sentences_2 && exercise.payload.solutions_1 && exercise.payload.solutions_2 && !showResults"
         mat-raised-button
         color="primary"
         (click)="checkAnswers()"
@@ -742,5 +907,11 @@
         {{ showAnswers ? 'Hide Answers' : 'Show Answers' }}
       </button>
     </div>
+
+    <!-- Raw Data global (fallback para cualquier tipo de ejercicio si es admin) -->
+    <details class="raw-data" *ngIf="isAdmin && exercise$ | async as exercise" style="margin-top: 32px;">
+      <summary>View Raw Data</summary>
+      <pre>{{ formatJson(exercise.payload) }}</pre>
+    </details>
   </div>
 </div>
