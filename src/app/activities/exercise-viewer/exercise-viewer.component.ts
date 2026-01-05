@@ -470,17 +470,30 @@ export class ExerciseViewerComponent implements OnInit {
 
   // Métodos para ejercicios de Signs
   getSignQuestion(choiceText: string): string {
-    // Formato: "Pregunta||opción1//opción2//opción3"
-    if (!choiceText || !choiceText.includes('||')) return choiceText;
-    return choiceText.split('||')[0];
+    // Formato con pregunta: "Pregunta||opción1//opción2//opción3"
+    // Formato sin pregunta: "opción1//opción2//opción3"
+    if (!choiceText) return '';
+    if (choiceText.includes('||')) {
+      return choiceText.split('||')[0];
+    }
+    // Si no hay pregunta explícita, devolver string vacío
+    return '';
   }
 
   getSignChoices(choiceText: string): string[] {
-    // Formato: "Pregunta||opción1//opción2//opción3"
-    if (!choiceText || !choiceText.includes('||')) return [];
-    const parts = choiceText.split('||');
-    if (parts.length < 2) return [];
-    return parts[1].split('//').map(c => c.trim());
+    // Formato con pregunta: "Pregunta||opción1//opción2//opción3"
+    // Formato sin pregunta: "opción1//opción2//opción3"
+    if (!choiceText) return [];
+
+    if (choiceText.includes('||')) {
+      // Tiene pregunta, extraer las opciones después de ||
+      const parts = choiceText.split('||');
+      if (parts.length < 2) return [];
+      return parts[1].split('//').map(c => c.trim());
+    } else {
+      // No tiene pregunta, todo el texto son las opciones separadas por //
+      return choiceText.split('//').map(c => c.trim());
+    }
   }
 
   getImageByKey(images: any[], key: string): string {
