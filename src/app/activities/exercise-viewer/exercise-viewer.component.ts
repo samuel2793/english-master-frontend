@@ -766,4 +766,45 @@ export class ExerciseViewerComponent implements OnInit {
     }
     return count;
   }
+
+  // Funciones para Open Cloze
+  getOpenClozeText(text: string, solutions: any): string {
+    if (!text || !solutions) return text;
+
+    // Reemplazar (0) BEEN con un span destacado para el ejemplo
+    let processedText = text.replace(/\(0\)\s*([A-Z]+)/g, '<span class="example-gap"><strong>(0) $1</strong></span>');
+
+    // Reemplazar los huecos (1), (2), etc. con spans clicables
+    for (const key of Object.keys(solutions)) {
+      const regex = new RegExp(`\\(${key}\\)\\s*\\.{6,}`, 'g');
+      processedText = processedText.replace(
+        regex,
+        `<span class="interactive-gap" id="gap-${key}"><strong>(${key})</strong></span>`
+      );
+    }
+
+    return processedText;
+  }
+
+  isOpenClozeCorrect(key: string, solutions: any): boolean {
+    if (!solutions || !solutions[key]) return false;
+
+    const userAnswer = this.userAnswers[key]?.trim().toLowerCase();
+    if (!userAnswer) return false;
+
+    // Soportar múltiples respuestas correctas separadas por "/"
+    const correctAnswers = solutions[key].split('/').map((ans: string) => ans.trim().toLowerCase());
+    return correctAnswers.includes(userAnswer);
+  }
+
+  getOpenClozeCorrectCount(solutions: any): number {
+    if (!solutions) return 0;
+    let count = 0;
+    for (const key of Object.keys(solutions)) {
+      if (this.isOpenClozeCorrect(key, solutions)) {
+        count++;
+      }
+    }
+    return count;
+  }
 }

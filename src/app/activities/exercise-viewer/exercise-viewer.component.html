@@ -714,9 +714,66 @@
       </div>
     </div>
 
+    <!-- Open Cloze (texto con huecos numerados sin opciones, el usuario escribe la respuesta) -->
+    <div *ngIf="!exercise.payload.audio && exercise.payload.text && exercise.payload.compact_solutions && !exercise.payload.compact_choices && !exercise.payload.compact_keywords && !exercise.payload.compact_challenges" class="open-cloze-section">
+      <!-- Título -->
+      <div *ngIf="exercise.payload.title" class="exercise-header">
+        <h2>{{ exercise.payload.title }}</h2>
+      </div>
+
+      <div class="instructions">
+        <mat-icon>info</mat-icon>
+        <p>For questions 1-8, read the text below and think of the word which best fits each gap. Use only one word in each gap.</p>
+      </div>
+
+      <!-- Texto con huecos interactivos -->
+      <div class="open-cloze-content">
+        <p [innerHTML]="getOpenClozeText(exercise.payload.text, exercise.payload.compact_solutions)"></p>
+      </div>
+
+      <!-- Inputs para cada hueco -->
+      <div class="gaps-grid">
+        <div *ngFor="let key of getObjectKeys(exercise.payload.compact_solutions)" class="gap-input-group">
+          <label class="gap-label">
+            <span class="gap-number">{{ key }}</span>
+            <mat-form-field appearance="outline" class="gap-field">
+              <input
+                matInput
+                [(ngModel)]="userAnswers[key]"
+                [disabled]="showResults"
+                placeholder="Type your answer..."
+                [class.correct-input]="showResults && isOpenClozeCorrect(key, exercise.payload.compact_solutions)"
+                [class.incorrect-input]="showResults && userAnswers[key] && !isOpenClozeCorrect(key, exercise.payload.compact_solutions)"
+              />
+            </mat-form-field>
+          </label>
+          <!-- Feedback -->
+          <div *ngIf="showResults && userAnswers[key]" class="feedback">
+            <div *ngIf="isOpenClozeCorrect(key, exercise.payload.compact_solutions)" class="correct-feedback">
+              <mat-icon>check_circle</mat-icon>
+              <span>Correct!</span>
+            </div>
+            <div *ngIf="!isOpenClozeCorrect(key, exercise.payload.compact_solutions)" class="incorrect-feedback">
+              <mat-icon>cancel</mat-icon>
+              <span>Incorrect. Correct answer: <strong>{{ exercise.payload.compact_solutions[key] }}</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div *ngIf="showResults" class="results-summary">
+        <mat-icon>{{ getOpenClozeCorrectCount(exercise.payload.compact_solutions) === getObjectKeys(exercise.payload.compact_solutions).length ? 'check_circle' : 'pending' }}</mat-icon>
+        <p>
+          You got <strong>{{ getOpenClozeCorrectCount(exercise.payload.compact_solutions) }}</strong> out of
+          <strong>{{ getObjectKeys(exercise.payload.compact_solutions).length }}</strong> correct!
+        </p>
+      </div>
+    </div>
+
     <!-- Listening / Reading / Use of English (Generic) -->
     <div
-      *ngIf="!isGrammarTest() && !isSpeaking() && !isWriting() && !isMatching() && !exercise.payload.people && !exercise.payload.audio && !exercise.payload.compact_keywords && !exercise.payload.compact_choices && exercise.payload"
+      *ngIf="!isGrammarTest() && !isSpeaking() && !isWriting() && !isMatching() && !exercise.payload.people && !exercise.payload.audio && !exercise.payload.compact_keywords && !exercise.payload.compact_choices && !(exercise.payload.text && exercise.payload.compact_solutions && !exercise.payload.compact_challenges) && exercise.payload"
       class="generic-exercise"
     >
       <!-- Título y subtítulo -->
@@ -1020,6 +1077,18 @@
       <!-- Botón para verificar respuestas (Multiple Choice Cloze) -->
       <button
         *ngIf="!exercise.payload.audio && exercise.payload.text && exercise.payload.compact_choices && exercise.payload.compact_solutions && !exercise.payload.compact_keywords && !showResults"
+        mat-raised-button
+        color="primary"
+        (click)="checkAnswers()"
+        [disabled]="getObjectKeys(userAnswers).length === 0"
+      >
+        <mat-icon>check</mat-icon>
+        Check Answers
+      </button>
+
+      <!-- Botón para verificar respuestas (Open Cloze) -->
+      <button
+        *ngIf="!exercise.payload.audio && exercise.payload.text && exercise.payload.compact_solutions && !exercise.payload.compact_choices && !exercise.payload.compact_keywords && !exercise.payload.compact_challenges && !showResults"
         mat-raised-button
         color="primary"
         (click)="checkAnswers()"
