@@ -339,8 +339,14 @@
       </div>
     </div>
 
-    <!-- Writing - Generic (other types, exclude B1 Email, Article, Story, and nested payload structures) -->
-    <div *ngIf="isWriting() && exercise.payload && !exercise.payload?.payload?.title1 && !exercise.payload?.payload?.text && exercise.payload?.type !== 'Email' && exercise.payload?.type !== 'Article' && exercise.payload?.type !== 'Story'" class="writing-exercise">
+    <!-- Writing - Generic (other types, exclude B1 Email, Article, Story, Essays, Reports, and nested payload structures) -->
+    <div *ngIf="isWriting() && exercise.payload &&
+                !exercise.payload?.title1 && !exercise.payload?.title2 &&
+                !exercise.payload?.opinions &&
+                !(exercise.payload?.headline && (exercise.payload?.points || exercise.payload?.opinions)) &&
+                !exercise.payload?.text &&
+                exercise.payload?.type !== 'Email' && exercise.payload?.type !== 'Article' && exercise.payload?.type !== 'Story' &&
+                exercise.payload?.type !== 'Essay' && exercise.payload?.type !== 'Report' && exercise.payload?.type !== 'Review' && exercise.payload?.type !== 'Letter'" class="writing-exercise">
       <div *ngIf="exercise.payload.opening" class="writing-section">
         <h3>Opening</h3>
         <p>{{ exercise.payload.opening }}</p>
