@@ -197,7 +197,7 @@
     </div>
 
     <!-- Listening Extracts (audio con preguntas y opciones múltiples) -->
-    <div *ngIf="exercise.payload.audio && exercise.payload.questions && exercise.payload.choices" class="extracts-section">
+    <div *ngIf="exercise.payload.audio && exercise.payload.questions && exercise.payload.choices && exercise.payload.headline && exercise.payload.headline.includes('//')" class="extracts-section">
       <!-- Reproductor de audio -->
       <div class="audio-player">
         <audio controls [src]="exercise.payload.audio">
@@ -309,6 +309,68 @@
         <p>
           You got <strong>{{ getGappedTextCorrectCount(exercise.payload.solutions) }}</strong> out of
           <strong>{{ getObjectKeys(exercise.payload.solutions).length }}</strong> correct!
+        </p>
+      </div>
+
+      <!-- Raw data para admin -->
+      <details class="raw-data" *ngIf="isAdmin">
+        <summary>View Raw Data</summary>
+        <pre>{{ formatJson(exercise.payload) }}</pre>
+      </details>
+    </div>
+
+    <!-- Listening Multiple Choice (audio + preguntas con opciones múltiples A, B, C, D) -->
+    <div *ngIf="exercise.payload.audio && exercise.payload.questions && exercise.payload.choices && (!exercise.payload.headline || !exercise.payload.headline.includes('//'))" class="multiple-choice-section">
+      <!-- Instrucciones -->
+      <div *ngIf="exercise.payload.headline" class="instructions">
+        <mat-icon>info</mat-icon>
+        <p>{{ exercise.payload.headline }}</p>
+      </div>
+
+      <!-- Reproductor de audio -->
+      <div class="audio-player">
+        <audio controls [src]="exercise.payload.audio">
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+
+      <!-- Preguntas -->
+      <h3>Questions</h3>
+      <div *ngFor="let key of getObjectKeys(exercise.payload.questions)" class="question-item">
+        <p class="question">
+          <strong>{{ key }}.</strong> {{ exercise.payload.questions[key] }}
+        </p>
+
+        <!-- Opciones múltiples (A, B, C, D) -->
+        <div class="answer-selector vertical">
+          <button
+            *ngFor="let choice of getExtractChoices(exercise.payload.choices[key]); let i = index"
+            mat-stroked-button
+            [color]="userAnswers[key] === choice ? 'primary' : ''"
+            [class.selected]="userAnswers[key] === choice && !showResults"
+            [class.correct]="showResults && userAnswers[key] === choice && isCorrectAnswer(key, exercise.payload.solutions)"
+            [class.incorrect]="showResults && userAnswers[key] === choice && !isCorrectAnswer(key, exercise.payload.solutions)"
+            [disabled]="showResults"
+            (click)="selectAnswer(key, choice)"
+          >
+            <span class="choice-label">{{ getChoiceLabel(i) }}.</span>
+            <span class="choice-text">{{ choice }}</span>
+          </button>
+        </div>
+
+        <!-- Mostrar respuesta correcta si está mal -->
+        <div *ngIf="showResults && !isCorrectAnswer(key, exercise.payload.solutions) && exercise.payload.solutions && exercise.payload.solutions[key]" class="correct-answer">
+          <mat-icon>info</mat-icon>
+          <span>Correct answer: {{ exercise.payload.solutions[key] }}</span>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div *ngIf="showResults && exercise.payload.solutions" class="results-summary">
+        <mat-icon>{{ getCorrectCount(exercise.payload.solutions) === getObjectKeys(exercise.payload.questions).length ? 'check_circle' : 'pending' }}</mat-icon>
+        <p>
+          You got <strong>{{ getCorrectCount(exercise.payload.solutions) }}</strong> out of
+          <strong>{{ getObjectKeys(exercise.payload.questions).length }}</strong> correct!
         </p>
       </div>
 
@@ -600,7 +662,19 @@
 
       <!-- Botón para verificar respuestas (Listening Extracts) -->
       <button
-        *ngIf="exercise.payload.audio && exercise.payload.questions && exercise.payload.solutions && !showResults && !exercise.payload.compact_questions"
+        *ngIf="exercise.payload.audio && exercise.payload.questions && exercise.payload.choices && exercise.payload.headline && exercise.payload.headline.includes('//') && exercise.payload.solutions && !showResults"
+        mat-raised-button
+        color="primary"
+        (click)="checkAnswers()"
+        [disabled]="getObjectKeys(userAnswers).length === 0"
+      >
+        <mat-icon>check</mat-icon>
+        Check Answers
+      </button>
+
+      <!-- Botón para verificar respuestas (Listening Multiple Choice) -->
+      <button
+        *ngIf="exercise.payload.audio && exercise.payload.questions && exercise.payload.choices && (!exercise.payload.headline || !exercise.payload.headline.includes('//')) && exercise.payload.solutions && !showResults"
         mat-raised-button
         color="primary"
         (click)="checkAnswers()"
