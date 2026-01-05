@@ -92,8 +92,28 @@
       </div>
     </div>
 
-    <!-- Writing -->
-    <div *ngIf="isWriting() && exercise.payload" class="writing-exercise">
+    <!-- Writing - Essay (two perspectives) -->
+    <div *ngIf="isWriting() && exercise.payload?.payload?.title1 && exercise.payload?.payload?.title2" class="writing-essay">
+      <div class="essay-perspectives">
+        <div class="perspective-card">
+          <h3>{{ exercise.payload.payload.title1 }}</h3>
+          <p>{{ exercise.payload.payload.text1 }}</p>
+        </div>
+
+        <div class="perspective-card">
+          <h3>{{ exercise.payload.payload.title2 }}</h3>
+          <p>{{ exercise.payload.payload.text2 }}</p>
+        </div>
+      </div>
+
+      <div class="writing-instructions">
+        <mat-icon>edit</mat-icon>
+        <p>Write an essay discussing both perspectives and give your own opinion. (Write 240-280 words)</p>
+      </div>
+    </div>
+
+    <!-- Writing - Generic (other types) -->
+    <div *ngIf="isWriting() && exercise.payload && !exercise.payload?.payload?.title1 && !exercise.payload?.payload?.title2" class="writing-exercise">
       <div *ngIf="exercise.payload.opening" class="writing-section">
         <h3>Opening</h3>
         <p>{{ exercise.payload.opening }}</p>
