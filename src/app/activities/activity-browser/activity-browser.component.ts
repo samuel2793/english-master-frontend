@@ -106,4 +106,12 @@ export class ActivityBrowserComponent implements OnInit {
   goBack(): void {
     this.router.navigate(['/']);
   }
+
+  getFormattedActivityName(activityName: string): string {
+    // Reemplazar guiones bajos y guiones por espacios
+    return activityName
+      .replace(/_/g, ' ')
+      .replace(/-/g, ' ')
+      .replace(/\b\w/g, (l) => l.toUpperCase());
+  }
 }

@@ -30,7 +30,7 @@
     >
       <mat-card-header>
         <mat-icon mat-card-avatar color="primary">folder</mat-icon>
-        <mat-card-title>{{ activity.name }}</mat-card-title>
+        <mat-card-title>{{ getFormattedActivityName(activity.name) }}</mat-card-title>
         <mat-card-subtitle *ngIf="activity.count">
           {{ activity.count }} exercise{{ activity.count !== 1 ? 's' : '' }}
         </mat-card-subtitle>
