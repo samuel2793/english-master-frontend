@@ -146,15 +146,48 @@
       </div>
     </div>
 
+    <!-- Writing - Essay B2 (simple headline with points, NOT Report/Review/Letter/Article) -->
+    <div *ngIf="isWriting() && exercise.payload?.payload?.headline && !exercise.payload?.payload?.opinions && exercise.payload?.payload?.points && !exercise.payload?.payload?.type" class="writing-essay-b2">
+      <div *ngIf="exercise.payload.payload.notice" class="essay-notice">
+        <p>{{ exercise.payload.payload.notice }}</p>
+      </div>
+
+      <div class="essay-headline">
+        <h3>{{ exercise.payload.payload.headline }}</h3>
+      </div>
+
+      <div class="essay-points">
+        <h4>Your essay should include the following points:</h4>
+        <ul>
+          <li *ngFor="let point of exercise.payload.payload.points">{{ point }}</li>
+        </ul>
+      </div>
+
+      <div class="writing-instructions">
+        <mat-icon>edit</mat-icon>
+        <p>Write your essay. (Write 140-190 words)</p>
+      </div>
+    </div>
+
     <!-- Writing - Report/Review/Letter/Article (single text instruction) -->
-    <div *ngIf="isWriting() && exercise.payload?.payload && !exercise.payload?.payload?.title1 && !exercise.payload?.payload?.headline &&
-                (exercise.payload.payload.text || exercise.payload.payload.notice || exercise.payload.payload.subject || exercise.payload.payload.points)" class="writing-report">
+    <div *ngIf="isWriting() && exercise.payload?.payload && !exercise.payload?.payload?.title1 && !exercise.payload?.payload?.opinions &&
+                (exercise.payload.payload.text || exercise.payload.payload.notice || exercise.payload.payload.subject || exercise.payload.payload.points || exercise.payload.payload.headline)" class="writing-report">
       <div class="report-type-badge">
         <mat-icon>description</mat-icon>
         <span>{{ exercise.payload.payload.type || 'Writing Task' }}</span>
       </div>
 
-      <!-- Notice (para Article y Review) -->
+      <!-- Prelude (para Letter B2) -->
+      <div *ngIf="exercise.payload.payload.prelude" class="report-prelude">
+        <p>{{ exercise.payload.payload.prelude }}</p>
+      </div>
+
+      <!-- Title (para Letter B2) -->
+      <div *ngIf="exercise.payload.payload.title" class="report-title">
+        <h3>{{ exercise.payload.payload.title }}</h3>
+      </div>
+
+      <!-- Notice (para Article, Review, Report, Letter) -->
       <div *ngIf="exercise.payload.payload.notice" class="report-notice">
         <p>{{ exercise.payload.payload.notice }}</p>
       </div>
@@ -162,6 +195,16 @@
       <!-- Subject (para Review/Proposal C1) -->
       <div *ngIf="exercise.payload.payload.subject" class="report-subject">
         <h4>{{ exercise.payload.payload.subject }}</h4>
+      </div>
+
+      <!-- Opening (para Article B2) -->
+      <div *ngIf="exercise.payload.payload.opening" class="report-opening">
+        <p>{{ exercise.payload.payload.opening }}</p>
+      </div>
+
+      <!-- Headline (para Report B2 como subtítulo "Your report should:") -->
+      <div *ngIf="exercise.payload.payload.headline" class="report-headline">
+        <h4>{{ exercise.payload.payload.headline }}</h4>
       </div>
 
       <!-- Topic (para Article) -->
@@ -205,7 +248,8 @@
 
       <div class="writing-instructions">
         <mat-icon>edit</mat-icon>
-        <p>Write 220-260 words.</p>
+        <p *ngIf="exercise.level === 'b2'">Write 140-190 words.</p>
+        <p *ngIf="exercise.level !== 'b2'">Write 220-260 words.</p>
       </div>
     </div>
 
