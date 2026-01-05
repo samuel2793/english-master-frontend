@@ -99,12 +99,15 @@ export class ExerciseListComponent implements OnInit {
     const activitiesWithNumbering = [
       'signs',
       'extracts',
-      'multiple-choice',
-      'pictures',
-      'key-word-transformations'
+      'pictures'
     ];
 
     const activityLower = this.activity?.toLowerCase() || '';
+
+    // Special case: 'multiple-choice' solo usa numeración si es de Listening
+    if (activityLower === 'multiple-choice' && this.course?.toLowerCase() === 'listening') {
+      return `Exercise ${index + 1}`;
+    }
 
     if (activitiesWithNumbering.includes(activityLower)) {
       return `Exercise ${index + 1}`;

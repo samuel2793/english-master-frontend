@@ -196,12 +196,15 @@ export class ExerciseViewerComponent implements OnInit {
     const activitiesWithSimpleTitle = [
       'signs',
       'extracts',
-      'multiple-choice',
-      'pictures',
-      'key-word-transformations'
+      'pictures'
     ];
 
     const activityLower = this.activity?.toLowerCase() || '';
+
+    // Special case: 'multiple-choice' solo usa título simple si es de Listening
+    if (activityLower === 'multiple-choice' && this.course?.toLowerCase() === 'listening') {
+      return 'Exercise';
+    }
 
     if (activitiesWithSimpleTitle.includes(activityLower)) {
       return 'Exercise';
@@ -728,6 +731,36 @@ export class ExerciseViewerComponent implements OnInit {
     let count = 0;
     for (const key of Object.keys(solutions)) {
       if (this.isKeyWordTransformationCorrect(key, solutions)) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  // Funciones para Multiple Choice Cloze
+  getMultipleChoiceClozeText(text: string, choices: any): string {
+    if (!text || !choices) return text;
+
+    // Reemplazar (0) IS con un span destacado para el ejemplo
+    let processedText = text.replace(/\(0\)\s*([A-Z]+)/g, '<span class="example-gap"><strong>(0) $1</strong></span>');
+
+    // Reemplazar los huecos (1), (2), etc. con spans clicables
+    for (const key of Object.keys(choices)) {
+      const regex = new RegExp(`\\(${key}\\)\\s*\\.{6,}`, 'g');
+      processedText = processedText.replace(
+        regex,
+        `<span class="interactive-gap" id="gap-${key}"><strong>(${key})</strong> <span class="gap-placeholder">........</span></span>`
+      );
+    }
+
+    return processedText;
+  }
+
+  getMultipleChoiceClozeCorrectCount(solutions: any): number {
+    if (!solutions) return 0;
+    let count = 0;
+    for (const key of Object.keys(solutions)) {
+      if (this.userAnswers[key] === solutions[key]) {
         count++;
       }
     }
