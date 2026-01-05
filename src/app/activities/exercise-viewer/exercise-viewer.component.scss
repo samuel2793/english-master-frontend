@@ -607,6 +607,217 @@
   }
 }
 
+// Writing - Article B1
+.writing-article-b1 {
+  .article-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 20px;
+    background: rgba(102, 126, 234, 0.08);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #667eea;
+
+    mat-icon {
+      color: #667eea;
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    p {
+      margin: 0;
+      color: #555;
+      font-size: 14px;
+      line-height: 1.6;
+      font-style: italic;
+    }
+  }
+
+  .article-opening {
+    margin-bottom: 20px;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    text-align: center;
+
+    h3 {
+      margin: 0;
+      color: white;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+  }
+
+  .article-points {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 2px solid #e9ecef;
+
+    ul {
+      margin: 0;
+      padding-left: 24px;
+      list-style: none;
+
+      li {
+        position: relative;
+        padding-left: 16px;
+        margin-bottom: 12px;
+        color: #2c3e50;
+        font-size: 15px;
+        line-height: 1.6;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        &::before {
+          content: "•";
+          position: absolute;
+          left: 0;
+          color: #667eea;
+          font-size: 20px;
+          font-weight: bold;
+        }
+      }
+    }
+  }
+
+  .article-closure {
+    padding: 16px 20px;
+    background: rgba(118, 75, 162, 0.08);
+    border-radius: 8px;
+    margin-bottom: 24px;
+    border-left: 4px solid #764ba2;
+
+    p {
+      margin: 0;
+      color: #555;
+      font-size: 14px;
+      line-height: 1.6;
+      font-weight: 500;
+    }
+  }
+
+  .writing-instructions {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-radius: 8px;
+    border: 2px solid #667eea;
+
+    mat-icon {
+      color: #667eea;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.6;
+      color: #2c3e50;
+      font-size: 15px;
+      font-weight: 500;
+    }
+  }
+}
+
+// Writing - Story B1
+.writing-story-b1 {
+  .story-headline {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 20px;
+    background: rgba(102, 126, 234, 0.08);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #667eea;
+
+    mat-icon {
+      color: #667eea;
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    p {
+      margin: 0;
+      color: #555;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  }
+
+  .story-opening {
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.15) 100%);
+    border-radius: 10px;
+    border: 3px solid #667eea;
+    margin-bottom: 24px;
+    position: relative;
+
+    &::before {
+      content: "\201C";
+      position: absolute;
+      top: -10px;
+      left: 10px;
+      font-size: 60px;
+      color: #667eea;
+      font-family: Georgia, serif;
+      line-height: 1;
+      opacity: 0.3;
+    }
+
+    .opening-text {
+      margin: 0;
+      color: #2c3e50;
+      font-size: 18px;
+      line-height: 1.7;
+      font-weight: 500;
+      font-style: italic;
+      position: relative;
+      z-index: 1;
+    }
+  }
+
+  .writing-instructions {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-radius: 8px;
+    border: 2px solid #667eea;
+
+    mat-icon {
+      color: #667eea;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.6;
+      color: #2c3e50;
+      font-size: 15px;
+      font-weight: 500;
+    }
+  }
+}
+
 // Writing - Essay B2 (simple format)
 .writing-essay-b2 {
   .essay-notice {

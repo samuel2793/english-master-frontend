@@ -187,6 +187,50 @@
       </div>
     </div>
 
+    <!-- Writing - Article B1 -->
+    <div *ngIf="isWriting() && exercise.payload?.type === 'Article' && exercise.payload?.notice && exercise.payload?.opening" class="writing-article-b1">
+      <div class="article-notice">
+        <mat-icon>info</mat-icon>
+        <p>{{ exercise.payload.notice }}</p>
+      </div>
+
+      <div class="article-opening">
+        <h3>{{ exercise.payload.opening }}</h3>
+      </div>
+
+      <div class="article-points" *ngIf="exercise.payload.points && exercise.payload.points.length > 0">
+        <ul>
+          <li *ngFor="let point of exercise.payload.points">{{ point }}</li>
+        </ul>
+      </div>
+
+      <div class="article-closure" *ngIf="exercise.payload.closure">
+        <p>{{ exercise.payload.closure }}</p>
+      </div>
+
+      <div class="writing-instructions">
+        <mat-icon>edit</mat-icon>
+        <p>Write your article. (Write 100-120 words)</p>
+      </div>
+    </div>
+
+    <!-- Writing - Story B1 -->
+    <div *ngIf="isWriting() && exercise.payload?.type === 'Story' && exercise.payload?.opening" class="writing-story-b1">
+      <div class="story-headline" *ngIf="exercise.payload.headline">
+        <mat-icon>menu_book</mat-icon>
+        <p>{{ exercise.payload.headline }}</p>
+      </div>
+
+      <div class="story-opening">
+        <p class="opening-text">{{ exercise.payload.opening }}</p>
+      </div>
+
+      <div class="writing-instructions">
+        <mat-icon>edit</mat-icon>
+        <p>Write your story. (Write 100-120 words)</p>
+      </div>
+    </div>
+
     <!-- Writing - Essay B2 (simple headline with points, NOT Report/Review/Letter/Article) -->
     <div *ngIf="isWriting() && exercise.payload?.payload?.headline && !exercise.payload?.payload?.opinions && exercise.payload?.payload?.points && !exercise.payload?.payload?.type" class="writing-essay-b2">
       <div *ngIf="exercise.payload.payload.notice" class="essay-notice">
@@ -294,8 +338,8 @@
       </div>
     </div>
 
-    <!-- Writing - Generic (other types, exclude B1 Email and nested payload structures) -->
-    <div *ngIf="isWriting() && exercise.payload && !exercise.payload?.payload?.title1 && !exercise.payload?.payload?.text && exercise.payload?.type !== 'Email'" class="writing-exercise">
+    <!-- Writing - Generic (other types, exclude B1 Email, Article, Story, and nested payload structures) -->
+    <div *ngIf="isWriting() && exercise.payload && !exercise.payload?.payload?.title1 && !exercise.payload?.payload?.text && exercise.payload?.type !== 'Email' && exercise.payload?.type !== 'Article' && exercise.payload?.type !== 'Story'" class="writing-exercise">
       <div *ngIf="exercise.payload.opening" class="writing-section">
         <h3>Opening</h3>
         <p>{{ exercise.payload.opening }}</p>
