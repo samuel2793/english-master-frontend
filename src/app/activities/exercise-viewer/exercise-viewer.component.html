@@ -584,9 +584,77 @@
       </div>
     </div>
 
+    <!-- Key Word Transformations (sentences + keywords + challenges + solutions) -->
+    <div *ngIf="!exercise.payload.audio && exercise.payload.compact_sentences && exercise.payload.compact_keywords && exercise.payload.compact_challenges && exercise.payload.compact_solutions" class="key-word-transformations-section">
+      <div class="instructions">
+        <mat-icon>info</mat-icon>
+        <p>Complete the second sentence so that it has a similar meaning to the first sentence, using the word given. Do not change the word given. You must use between three and eight words, including the word given.</p>
+      </div>
+
+      <div class="transformations-container">
+        <div *ngFor="let key of getObjectKeys(exercise.payload.compact_sentences)" class="transformation-item">
+          <div class="question-number">{{ key }}</div>
+
+          <!-- Oración original -->
+          <div class="original-sentence">
+            <p>{{ exercise.payload.compact_sentences[key] }}</p>
+          </div>
+
+          <!-- Palabra clave -->
+          <div class="keyword-box">
+            <span class="keyword-label">Key word:</span>
+            <span class="keyword">{{ exercise.payload.compact_keywords[key] }}</span>
+          </div>
+
+          <!-- Oración a completar -->
+          <div class="challenge-sentence">
+            <p>{{ exercise.payload.compact_challenges[key] }}</p>
+          </div>
+
+          <!-- Campo de respuesta -->
+          <div class="answer-input">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Your answer</mat-label>
+              <input
+                matInput
+                [(ngModel)]="userAnswers[key]"
+                [disabled]="showResults"
+                placeholder="Type your answer here..."
+              />
+            </mat-form-field>
+          </div>
+
+          <!-- Feedback -->
+          <div *ngIf="showResults" class="feedback">
+            <div *ngIf="isKeyWordTransformationCorrect(key, exercise.payload.compact_solutions)" class="correct-feedback">
+              <mat-icon>check_circle</mat-icon>
+              <span>Correct!</span>
+            </div>
+            <div *ngIf="!isKeyWordTransformationCorrect(key, exercise.payload.compact_solutions)" class="incorrect-feedback">
+              <mat-icon>cancel</mat-icon>
+              <div class="incorrect-content">
+                <span>Incorrect.</span>
+                <span class="correct-answer-label">Correct answer(s):</span>
+                <span class="correct-answer-value">{{ exercise.payload.compact_solutions[key] }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div *ngIf="showResults" class="results-summary">
+        <mat-icon>{{ getKeyWordTransformationsCorrectCount(exercise.payload.compact_solutions) === getObjectKeys(exercise.payload.compact_solutions).length ? 'check_circle' : 'pending' }}</mat-icon>
+        <p>
+          You got <strong>{{ getKeyWordTransformationsCorrectCount(exercise.payload.compact_solutions) }}</strong> out of
+          <strong>{{ getObjectKeys(exercise.payload.compact_solutions).length }}</strong> correct!
+        </p>
+      </div>
+    </div>
+
     <!-- Listening / Reading / Use of English (Generic) -->
     <div
-      *ngIf="!isGrammarTest() && !isSpeaking() && !isWriting() && !isMatching() && !exercise.payload.people && !exercise.payload.audio && exercise.payload"
+      *ngIf="!isGrammarTest() && !isSpeaking() && !isWriting() && !isMatching() && !exercise.payload.people && !exercise.payload.audio && !exercise.payload.compact_keywords && exercise.payload"
       class="generic-exercise"
     >
       <!-- Título y subtítulo -->
@@ -866,6 +934,18 @@
       <!-- Botón para verificar respuestas (Listening Pictures) -->
       <button
         *ngIf="exercise.payload.audio && exercise.payload.base_file_path && exercise.payload.questions && exercise.payload.choices && exercise.payload.solutions && !showResults"
+        mat-raised-button
+        color="primary"
+        (click)="checkAnswers()"
+        [disabled]="getObjectKeys(userAnswers).length === 0"
+      >
+        <mat-icon>check</mat-icon>
+        Check Answers
+      </button>
+
+      <!-- Botón para verificar respuestas (Key Word Transformations) -->
+      <button
+        *ngIf="!exercise.payload.audio && exercise.payload.compact_sentences && exercise.payload.compact_keywords && exercise.payload.compact_challenges && exercise.payload.compact_solutions && !showResults"
         mat-raised-button
         color="primary"
         (click)="checkAnswers()"

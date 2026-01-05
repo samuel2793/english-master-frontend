@@ -100,7 +100,8 @@ export class ExerciseListComponent implements OnInit {
       'signs',
       'extracts',
       'multiple-choice',
-      'pictures'
+      'pictures',
+      'key-word-transformations'
     ];
 
     const activityLower = this.activity?.toLowerCase() || '';

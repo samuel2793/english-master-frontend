@@ -197,7 +197,8 @@ export class ExerciseViewerComponent implements OnInit {
       'signs',
       'extracts',
       'multiple-choice',
-      'pictures'
+      'pictures',
+      'key-word-transformations'
     ];
 
     const activityLower = this.activity?.toLowerCase() || '';
@@ -705,6 +706,28 @@ export class ExerciseViewerComponent implements OnInit {
     let count = 0;
     for (const key of Object.keys(solutions)) {
       if (this.userAnswers[key] === solutions[key]) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  // Funciones para Key Word Transformations
+  isKeyWordTransformationCorrect(key: string, solutions: any): boolean {
+    if (!solutions || !solutions[key]) return false;
+
+    const userAnswer = this.userAnswers[key]?.trim().toLowerCase();
+    if (!userAnswer) return false;
+
+    const correctAnswers = solutions[key].split('/').map((ans: string) => ans.trim().toLowerCase());
+    return correctAnswers.includes(userAnswer);
+  }
+
+  getKeyWordTransformationsCorrectCount(solutions: any): number {
+    if (!solutions) return 0;
+    let count = 0;
+    for (const key of Object.keys(solutions)) {
+      if (this.isKeyWordTransformationCorrect(key, solutions)) {
         count++;
       }
     }
