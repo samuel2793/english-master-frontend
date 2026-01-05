@@ -163,13 +163,24 @@ export class ActivitiesService {
                                   title.toLowerCase() === 'exercise list' ||
                                   doc.filename.toLowerCase().includes('list');
 
+            // Filtrar archivos "exercises.json" (metadatos de lista de ejercicios)
+            const isExercisesFile = doc.filename.toLowerCase() === 'exercises.json' ||
+                                   doc.filename.toLowerCase().includes('exercises');
+
+            // Filtrar archivos de metadatos de Writing que tienen quantity, course_id, percentage
+            const isWritingMetadata = course === 'writing' &&
+                                     doc.data &&
+                                     (doc.data.quantity !== undefined || doc.data.course_id !== undefined);
+
             // Filtrar archivos de índice y cantidades
             if (groupName &&
                 !doc.filename.includes('index') &&
                 !doc.filename.includes('quantities') &&
                 !doc.filename.includes('activities') &&
                 !isBareExercise &&
-                !isListExercise) {
+                !isListExercise &&
+                !isExercisesFile &&
+                !isWritingMetadata) {
               const count = groups.get(groupName) || 0;
               groups.set(groupName, count + 1);
             }
@@ -259,15 +270,15 @@ export class ActivitiesService {
                                     title.toLowerCase() === 'exercise list' ||
                                     doc.filename.toLowerCase().includes('list');
 
-              // Para Writing, filtrar archivos de metadatos/índice que no son ejercicios reales
-              // Los ejercicios reales tienen 'payload' o campos de contenido directo (text1, title1, etc.)
+              // Filtrar archivos "exercises.json" (metadatos de lista de ejercicios)
+              const isExercisesFile = doc.filename.toLowerCase() === 'exercises.json' ||
+                                     doc.filename.toLowerCase().includes('exercises');
+
+              // Para Writing, filtrar archivos de metadatos que tienen quantity o course_id
+              // (archivos de configuración, no ejercicios reales)
               const isWritingMetadata = course === 'writing' &&
                                        doc.data &&
-                                       !doc.data.payload &&
-                                       !doc.data.text1 &&
-                                       !doc.data.title1 &&
-                                       !doc.data.type &&
-                                       (doc.data.name || doc.data.slug);
+                                       (doc.data.quantity !== undefined || doc.data.course_id !== undefined);
 
               return matches &&
                      !doc.filename.includes('index') &&
@@ -275,6 +286,7 @@ export class ActivitiesService {
                      !doc.filename.includes('activities') &&
                      !isBareExercise &&
                      !isListExercise &&
+                     !isExercisesFile &&
                      !isWritingMetadata;
             })
             .sort((a, b) => {
