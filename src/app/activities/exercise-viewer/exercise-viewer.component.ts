@@ -807,4 +807,45 @@ export class ExerciseViewerComponent implements OnInit {
     }
     return count;
   }
+
+  // Funciones para Word Formation
+  hasWordFormationPattern(text: string): boolean {
+    if (!text) return false;
+    // Word Formation tiene palabras base en mayúsculas entre paréntesis después de los huecos
+    // Patrón: (1) .......... (CASE)
+    return /\(\d+\)\s*\.{6,}\s*\([A-Z]+\)/.test(text);
+  }
+
+  getWordFormationText(text: string): string {
+    if (!text) return text;
+
+    let processedText = text;
+
+    // Reemplazar todos los patrones (N) .......... (WORD) con solo el hueco interactivo
+    processedText = processedText.replace(
+      /\((\d+)\)\s*\.{6,}\s*\([A-Z]+\)/g,
+      (match, gapNumber) => {
+        return `<span class="interactive-gap"><strong>(${gapNumber})</strong> <span class="gap-placeholder">........</span></span>`;
+      }
+    );
+
+    return processedText;
+  }
+
+  getWordFormationBaseWords(text: string): any[] {
+    if (!text) return [];
+
+    const words: any[] = [];
+    const regex = /\((\d+)\)\s*\.{6,}\s*\(([A-Z]+)\)/g;
+    let match;
+
+    while ((match = regex.exec(text)) !== null) {
+      words.push({
+        number: match[1],
+        word: match[2]
+      });
+    }
+
+    return words;
+  }
 }
