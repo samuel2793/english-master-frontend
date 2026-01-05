@@ -259,12 +259,21 @@ export class ActivitiesService {
                                     title.toLowerCase() === 'exercise list' ||
                                     doc.filename.toLowerCase().includes('list');
 
+              // Para Writing, filtrar ejercicios que no tienen payload anidado (son metadatos)
+              const isWritingMetadata = course === 'writing' &&
+                                       doc.data &&
+                                       !doc.data.payload &&
+                                       (doc.data.name || doc.data.slug) &&
+                                       !doc.data.text1 &&
+                                       !doc.data.title1;
+
               return matches &&
                      !doc.filename.includes('index') &&
                      !doc.filename.includes('quantities') &&
                      !doc.filename.includes('activities') &&
                      !isBareExercise &&
-                     !isListExercise;
+                     !isListExercise &&
+                     !isWritingMetadata;
             })
             .sort((a, b) => {
               // Para grammar-tests, ordenar por el campo 'number' del payload
