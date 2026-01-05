@@ -387,6 +387,39 @@ export class ExerciseViewerComponent implements OnInit {
     return String.fromCharCode(96 + gapNumber); // 97 es 'a' en ASCII
   }
 
+  getCorrectGapAnswer(gapIndex: string, exercise: Exercise): string {
+    // Detectar tipo de ejercicio
+    const isMissingSentences = exercise.payload.text?.match(/\(\d+\)\s*\.{3,}/g);
+    const isMissingParagraphs = exercise.payload.text?.includes('[]');
+
+    // Para Missing Sentences
+    if (isMissingSentences && (exercise.payload.solutions || exercise.payload.compact_solutions)) {
+      let correctAnswerText: string | undefined;
+      if (exercise.payload.compact_solutions && exercise.payload.compact_solutions[gapIndex]) {
+        correctAnswerText = exercise.payload.compact_solutions[gapIndex];
+      } else if (exercise.payload.solutions && Array.isArray(exercise.payload.solutions)) {
+        const solution = exercise.payload.solutions.find((s: any) => s.key?.toString() === gapIndex);
+        correctAnswerText = solution?.value;
+      }
+
+      // Encontrar la displayKey de la respuesta correcta
+      if (correctAnswerText && this.shuffledChoices.length > 0) {
+        const correctChoice = this.shuffledChoices.find((c: any) => c.value === correctAnswerText);
+        return correctChoice?.displayKey || correctChoice?.key || '';
+      }
+      return '';
+    }
+
+    // Para Missing Paragraphs (orden alfabético)
+    if (isMissingParagraphs && exercise.payload.choices) {
+      const expectedKey = this.getExpectedAnswerForGap(parseInt(gapIndex));
+      const correctChoice = this.shuffledChoices.find((c: any) => c.key === expectedKey);
+      return correctChoice?.displayKey || expectedKey;
+    }
+
+    return '';
+  }
+
   getCorrectGapsCount(exercise: Exercise): number {
     // Contar cuántos gaps tienen la respuesta correcta
     let correctCount = 0;

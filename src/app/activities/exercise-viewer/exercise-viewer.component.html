@@ -238,6 +238,9 @@
               <span class="gap-bracket">[</span>
               <span class="gap-number">{{ segment.index }}</span>
               <span *ngIf="userAnswers[segment.index]" class="gap-answer">: {{ getDisplayKey(userAnswers[segment.index]) }}</span>
+              <span *ngIf="showResults && userAnswers[segment.index] && !checkGapAnswer(segment.index, exercise)" class="correct-answer-indicator">
+                → {{ getCorrectGapAnswer(segment.index, exercise) }}
+              </span>
               <span class="gap-bracket">]</span>
             </span>
           </ng-container>
