@@ -1556,9 +1556,17 @@
     </div>
 
     <!-- Raw Data global (fallback para cualquier tipo de ejercicio si es admin) -->
-    <details class="raw-data" *ngIf="isAdmin && exercise$ | async as exercise" style="margin-top: 32px;">
-      <summary>View Raw Data</summary>
-      <pre>{{ formatJson(exercise.payload) }}</pre>
-    </details>
+    <!-- Excluir templates que ya tienen su propio Raw Data: Listening Extracts, Gapped Text, Multiple Choice -->
+    <ng-container *ngIf="exercise$ | async as exercise">
+      <details class="raw-data" *ngIf="isAdmin &&
+                                        !(exercise.payload.audio && exercise.payload.questions && exercise.payload.choices && exercise.payload.headline && exercise.payload.headline.includes('//')) &&
+                                        !(exercise.payload.audio && exercise.payload.text && exercise.payload.solutions && !exercise.payload.questions) &&
+                                        !(exercise.payload.audio && exercise.payload.questions && exercise.payload.choices && (!exercise.payload.headline || !exercise.payload.headline.includes('//'))) &&
+                                        !(exercise.payload.audio && exercise.payload.sentences && exercise.payload.solutions)"
+               style="margin-top: 32px;">
+        <summary>View Raw Data</summary>
+        <pre>{{ formatJson(exercise.payload) }}</pre>
+      </details>
+    </ng-container>
   </div>
 </div>
