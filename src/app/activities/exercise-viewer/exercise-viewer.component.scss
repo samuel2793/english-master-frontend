@@ -77,6 +77,199 @@
   border-radius: 16px;
   padding: 32px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+  // Estilos para Missing Paragraphs
+  .missing-paragraphs {
+    // Texto continuo con gaps inline pequeños
+    .continuous-text {
+      font-size: 16px;
+      line-height: 2;
+      color: #2c3e50;
+      margin-bottom: 32px;
+      text-align: justify;
+
+      .text-part {
+        // Texto normal inline
+      }
+
+      .inline-gap {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        padding: 4px 8px;
+        margin: 0 3px;
+        border-radius: 6px;
+        background: rgba(102, 126, 234, 0.1);
+        border: 2px solid rgba(102, 126, 234, 0.3);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        vertical-align: baseline;
+        white-space: nowrap;
+
+        &:hover {
+          background: rgba(102, 126, 234, 0.15);
+          transform: scale(1.05);
+        }
+
+        &.selected {
+          background: #667eea;
+          border-color: #667eea;
+          color: white;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+          animation: pulse 1s ease-in-out infinite;
+
+          .gap-bracket {
+            color: rgba(255, 255, 255, 0.7);
+          }
+        }
+
+        &.filled {
+          background: rgba(102, 126, 234, 0.2);
+          border-color: #667eea;
+          color: #667eea;
+        }
+
+        &.correct {
+          background: rgba(76, 175, 80, 0.2);
+          border-color: #4caf50;
+          color: #4caf50;
+        }
+
+        &.incorrect {
+          background: rgba(244, 67, 54, 0.2);
+          border-color: #f44336;
+          color: #f44336;
+        }
+
+        .gap-bracket {
+          font-weight: 400;
+          opacity: 0.6;
+        }
+
+        .gap-number {
+          font-size: 14px;
+        }
+
+        .gap-answer {
+          font-size: 13px;
+          font-weight: 700;
+        }
+
+        .correct-answer-indicator {
+          font-size: 12px;
+          font-weight: 700;
+          color: #16a34a;
+          margin-left: 4px;
+        }
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+      }
+      50% {
+        box-shadow: 0 0 0 6px rgba(102, 126, 234, 0.3);
+      }
+    }
+
+    // Instrucción
+    .instruction {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background: rgba(102, 126, 234, 0.05);
+      border-left: 4px solid #667eea;
+      border-radius: 8px;
+      margin-bottom: 32px;
+      color: #2c3e50;
+
+      mat-icon {
+        color: #667eea;
+      }
+
+      .highlight {
+        font-weight: 600;
+        color: #667eea;
+      }
+    }
+
+    // Párrafos disponibles debajo
+    .available-paragraphs {
+      margin-top: 40px;
+      padding: 24px;
+      background: #f8f9fa;
+      border-radius: 12px;
+
+      h3 {
+        font-size: 17px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0 0 20px;
+      }
+
+      .paragraphs-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 16px;
+
+        .paragraph-card {
+          padding: 16px;
+          background: white;
+          border-radius: 8px;
+          border: 2px solid #e0e0e0;
+          transition: all 0.3s ease;
+          user-select: none;
+
+          &.clickable {
+            cursor: pointer;
+
+            &:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              border-color: #667eea;
+            }
+          }
+
+          &.used {
+            opacity: 0.4;
+            cursor: default;
+            border-color: #ccc;
+          }
+
+          .paragraph-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+
+            .paragraph-label {
+              font-size: 20px;
+              font-weight: 700;
+              color: #667eea;
+            }
+
+            .used-in {
+              font-size: 12px;
+              color: #4caf50;
+              font-weight: 600;
+            }
+          }
+
+          .paragraph-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #2c3e50;
+            margin: 0;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+          }
+        }
+      }
+    }
+  }
 }
 
 // Grammar Tests

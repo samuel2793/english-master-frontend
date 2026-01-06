@@ -34,6 +34,7 @@ export class ExerciseViewerComponent implements OnInit {
   shuffledChoices: any[] = []; // Opciones aleatorizadas para Missing Paragraphs
   shuffledAnswers: { [questionKey: string]: string[] } = {}; // Respuestas aleatorizadas para Long Text
   gappedTextLines: any[] = []; // Líneas procesadas para Gapped Text (cacheadas)
+  hasMissingGapsCache = false; // Cache para evitar múltiples llamadas a hasMissingGaps()
   isAdmin = false;
 
   constructor(
@@ -81,9 +82,38 @@ export class ExerciseViewerComponent implements OnInit {
     this.exercise$.subscribe((exercise) => {
       this.loading = false;
 
-      // Aleatorizar opciones para Missing Paragraphs/Sentences (solo si choices es un array)
+      // Cachear si tiene missing gaps para evitar múltiples llamadas desde el template
+      this.hasMissingGapsCache = exercise?.payload?.text ? this.hasMissingGaps(exercise.payload.text) : false;
+
+      // DEBUGGING: Detectar tipo de ejercicio
+      console.log('🎯 EXERCISE TYPE DETECTION:', {
+        course: exercise?.course,
+        activity: exercise?.activity,
+        hasText: !!exercise?.payload?.text,
+        hasTexts: !!exercise?.payload?.texts,
+        hasAudio: !!exercise?.payload?.audio,
+        hasQuestions: !!exercise?.payload?.questions,
+        hasChoices: !!exercise?.payload?.choices,
+        hasCompactChoices: !!exercise?.payload?.compact_choices,
+        hasCompactSolutions: !!exercise?.payload?.compact_solutions,
+        hasSolutions: !!exercise?.payload?.solutions,
+        hasMissingGapsCache: this.hasMissingGapsCache,
+        detectedType: this.detectExerciseType(exercise)
+      });
+
+      // Aleatorizar opciones para Missing Paragraphs/Sentences
       if (exercise?.payload?.choices && Array.isArray(exercise.payload.choices)) {
         this.shuffledChoices = this.shuffleAndRelabelChoices([...exercise.payload.choices]);
+        console.log('✅ Shuffled choices (array):', this.shuffledChoices);
+      } else if (exercise?.payload?.compact_choices) {
+        // Si tiene compact_choices, convertirlo a array
+        const choicesArray = Object.entries(exercise.payload.compact_choices).map(([key, value]) => ({
+          key,
+          value,
+          displayKey: key.toUpperCase()
+        }));
+        this.shuffledChoices = this.shuffleAndRelabelChoices(choicesArray);
+        console.log('✅ Shuffled choices (from compact_choices):', this.shuffledChoices);
       }
       // Aleatorizar respuestas para Long Text
       if (exercise?.payload?.compact_answers) {
@@ -93,6 +123,9 @@ export class ExerciseViewerComponent implements OnInit {
       if (exercise?.payload?.text && exercise?.payload?.audio && exercise?.payload?.solutions && !exercise?.payload?.questions) {
         this.gappedTextLines = this.processGappedTextLines(exercise.payload.text);
       }
+
+      // Forzar detección de cambios
+      this.cdr.detectChanges();
     });
   }
 
@@ -110,9 +143,7 @@ export class ExerciseViewerComponent implements OnInit {
       ...choice,
       displayKey: alphabet[index] // Nueva clave para mostrar
     }));
-  }
-
-  shuffleCompactAnswers(compactAnswers: any): { [questionKey: string]: string[] } {
+  }  shuffleCompactAnswers(compactAnswers: any): { [questionKey: string]: string[] } {
     const shuffled: { [questionKey: string]: string[] } = {};
     for (const key in compactAnswers) {
       if (compactAnswers.hasOwnProperty(key)) {
@@ -163,8 +194,35 @@ export class ExerciseViewerComponent implements OnInit {
 
   hasMissingGaps(text: string): boolean {
     if (!text) return false;
-    // Detectar si tiene patrón (1) ........... o []
-    return /\(\d+\)\s*\.{3,}/.test(text) || text.includes('[]');
+    return /\(\d+\)\s*\.{3,}/.test(text) || text.includes('[]') || /\[([a-z])\]/i.test(text);
+  }
+
+  detectExerciseType(exercise: any): string {
+    if (!exercise?.payload) return 'UNKNOWN';
+
+    const p = exercise.payload;
+
+    // Missing Paragraphs/Sentences
+    if (p.text && this.hasMissingGaps(p.text) && (p.choices || p.compact_choices) && !p.compact_solutions) {
+      return 'MISSING_PARAGRAPHS';
+    }
+
+    // Gapped Text (Listening)
+    if (p.text && p.audio && p.solutions && !p.questions) {
+      return 'GAPPED_TEXT';
+    }
+
+    // Multiple texts
+    if (p.texts) {
+      return 'MULTIPLE_TEXTS';
+    }
+
+    // Simple text
+    if (p.text && !this.hasMissingGaps(p.text)) {
+      return 'SIMPLE_TEXT';
+    }
+
+    return 'OTHER';
   }
 
   parseGrammarChoices(choicesString: string): string[] {
@@ -306,8 +364,9 @@ export class ExerciseViewerComponent implements OnInit {
     if (!text) return [];
     const segments: Array<{type: string, content?: string, index?: string}> = [];
 
-    // Detectar si usa patrón (1) ........... o []
-    const hasMissingSentencesPattern = /\(\d+\)\s*\.{3,}/g.test(text);
+    // Detectar si usa patrón (1) ........... o [letra] o []
+    const hasMissingSentencesPattern = /\(\d+\)\s*\.{3,}/.test(text);
+    const hasLetterGapsPattern = /\[[a-z]\]/i.test(text);
 
     if (hasMissingSentencesPattern) {
       // Patrón para Missing Sentences: (1) ...........
@@ -327,8 +386,27 @@ export class ExerciseViewerComponent implements OnInit {
       if (lastIndex < text.length) {
         segments.push({ type: 'text', content: text.substring(lastIndex) });
       }
+    } else if (hasLetterGapsPattern) {
+      // Patrón para Missing Paragraphs con letras: [a], [b], [c]
+      const regex = /\[([a-z])\]/gi;
+      let lastIndex = 0;
+      let match;
+
+      while ((match = regex.exec(text)) !== null) {
+        // Agregar texto antes del gap
+        if (match.index > lastIndex) {
+          segments.push({ type: 'text', content: text.substring(lastIndex, match.index) });
+        }
+        segments.push({ type: 'gap', index: match[1].toLowerCase() });
+        lastIndex = match.index + match[0].length;
+      }
+
+      // Añadir texto restante
+      if (lastIndex < text.length) {
+        segments.push({ type: 'text', content: text.substring(lastIndex) });
+      }
     } else {
-      // Patrón para Missing Paragraphs: []
+      // Patrón para Missing Paragraphs: [] (vacío)
       const parts = text.split('[]');
       parts.forEach((part, index) => {
         if (part.trim()) {
@@ -344,10 +422,14 @@ export class ExerciseViewerComponent implements OnInit {
   }
 
   getTotalGaps(text: string): number {
-    // Contar gaps de patrón (1) ........... o []
+    // Contar gaps de patrón (1) ........... o [] o [letra]
     const missingSentencesGaps = (text.match(/\(\d+\)\s*\.{3,}/g) || []).length;
     const missingParagraphsGaps = (text.match(/\[\]/g) || []).length;
-    return missingSentencesGaps > 0 ? missingSentencesGaps : missingParagraphsGaps;
+    const letterGaps = (text.match(/\[[a-z]\]/gi) || []).length;
+
+    if (missingSentencesGaps > 0) return missingSentencesGaps;
+    if (letterGaps > 0) return letterGaps;
+    return missingParagraphsGaps;
   }
 
   getChoiceText(choices: any[], key: string): string {

@@ -1098,6 +1098,71 @@
       </div>
     </div>
 
+    <!-- Missing Paragraphs / Missing Sentences (texto con gaps [] y choices) -->
+    <div *ngIf="exercise?.payload?.text && hasMissingGapsCache && (exercise.payload.choices || exercise.payload.compact_choices) && !exercise.payload.compact_solutions" class="missing-paragraphs">
+      <!-- Texto continuo con gaps inline -->
+      <div class="continuous-text">
+        <ng-container *ngFor="let segment of getTextSegments(exercise.payload.text)">
+          <span *ngIf="segment.type === 'text'" class="text-part">{{ segment.content }} </span>
+          <span
+            *ngIf="segment.type === 'gap'"
+            class="inline-gap"
+            [class.filled]="userAnswers[segment.index]"
+            [class.selected]="selectedGap === segment.index"
+            [class.correct]="showResults && checkGapAnswer(segment.index, exercise)"
+            [class.incorrect]="showResults && userAnswers[segment.index] && !checkGapAnswer(segment.index, exercise)"
+            (click)="!showResults && selectGap(segment.index)"
+          >
+            <span class="gap-bracket">[</span>
+            <span class="gap-number">{{ segment.index }}</span>
+            <span *ngIf="userAnswers[segment.index]" class="gap-answer">: {{ getDisplayKey(userAnswers[segment.index]) }}</span>
+            <span *ngIf="showResults && userAnswers[segment.index] && !checkGapAnswer(segment.index, exercise)" class="correct-answer-indicator">
+              → {{ getCorrectGapAnswer(segment.index, exercise) }}
+            </span>
+            <span class="gap-bracket">]</span>
+          </span>
+        </ng-container>
+      </div>
+
+      <!-- Instrucción -->
+      <div class="instruction" *ngIf="!showResults">
+        <mat-icon>info</mat-icon>
+        <span *ngIf="!selectedGap">Click on a gap [number] above to select it</span>
+        <span *ngIf="selectedGap" class="highlight">Gap {{ selectedGap }} selected → Now click a paragraph below</span>
+      </div>
+
+      <!-- Párrafos disponibles -->
+      <div class="available-paragraphs">
+        <h3>Available Options:</h3>
+        <div class="paragraphs-list">
+          <div
+            *ngFor="let choice of (shuffledChoices.length > 0 ? shuffledChoices : exercise.payload.choices)"
+            class="paragraph-card"
+            [class.used]="isChoiceUsed(choice.key)"
+            [class.clickable]="selectedGap && !showResults"
+            (click)="!showResults && selectedGap && assignParagraphToGap(choice.key)"
+          >
+            <div class="paragraph-header">
+              <span class="paragraph-label">{{ choice.displayKey || choice.key }}</span>
+              <span *ngIf="isChoiceUsed(choice.key)" class="used-in">
+                ✓ Gap {{ getGapForChoice(choice.key) }}
+              </span>
+            </div>
+            <p class="paragraph-text">{{ choice.value }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div *ngIf="showResults" class="results-summary">
+        <mat-icon>{{ getCorrectGapsCount(exercise) === getTotalGaps(exercise.payload.text) ? 'check_circle' : 'pending' }}</mat-icon>
+        <p>
+          You got <strong>{{ getCorrectGapsCount(exercise) }}</strong> out of
+          <strong>{{ getTotalGaps(exercise.payload.text) }}</strong> correct!
+        </p>
+      </div>
+    </div>
+
     <!-- Listening / Reading / Use of English (Generic) -->
     <div
       *ngIf="!isGrammarTest() && !isSpeaking() && !isWriting() && !isMatching() && !exercise.payload.people && !exercise.payload.audio && !exercise.payload.compact_keywords && !exercise.payload.compact_choices && !(exercise.payload.text && exercise.payload.compact_solutions && !exercise.payload.compact_challenges) && exercise.payload"
@@ -1118,73 +1183,8 @@
       </div>
 
       <!-- Texto único (para otros tipos) -->
-      <div *ngIf="exercise.payload.text && !exercise.payload.texts && !hasMissingGaps(exercise.payload.text)" class="main-text">
+      <div *ngIf="exercise.payload.text && !exercise.payload.texts && !hasMissingGapsCache" class="main-text">
         <p class="text-content" style="white-space: pre-line;">{{ formatTextWithBreaks(exercise.payload.text) }}</p>
-      </div>
-
-      <!-- Missing Paragraphs / Missing Sentences (texto con gaps y choices) -->
-      <div *ngIf="exercise.payload.text && hasMissingGaps(exercise.payload.text) && exercise.payload.choices" class="missing-paragraphs">
-        <!-- Texto continuo con gaps inline -->
-        <div class="continuous-text">
-          <ng-container *ngFor="let segment of getTextSegments(exercise.payload.text)">
-            <span *ngIf="segment.type === 'text'" class="text-part">{{ segment.content }} </span>
-            <span
-              *ngIf="segment.type === 'gap'"
-              class="inline-gap"
-              [class.filled]="userAnswers[segment.index]"
-              [class.selected]="selectedGap === segment.index"
-              [class.correct]="showResults && checkGapAnswer(segment.index, exercise)"
-              [class.incorrect]="showResults && userAnswers[segment.index] && !checkGapAnswer(segment.index, exercise)"
-              (click)="!showResults && selectGap(segment.index)"
-            >
-              <span class="gap-bracket">[</span>
-              <span class="gap-number">{{ segment.index }}</span>
-              <span *ngIf="userAnswers[segment.index]" class="gap-answer">: {{ getDisplayKey(userAnswers[segment.index]) }}</span>
-              <span *ngIf="showResults && userAnswers[segment.index] && !checkGapAnswer(segment.index, exercise)" class="correct-answer-indicator">
-                → {{ getCorrectGapAnswer(segment.index, exercise) }}
-              </span>
-              <span class="gap-bracket">]</span>
-            </span>
-          </ng-container>
-        </div>
-
-        <!-- Instrucción -->
-        <div class="instruction" *ngIf="!showResults">
-          <mat-icon>info</mat-icon>
-          <span *ngIf="!selectedGap">Click on a gap [number] above to select it</span>
-          <span *ngIf="selectedGap" class="highlight">Gap {{ selectedGap }} selected → Now click a paragraph below</span>
-        </div>
-
-        <!-- Párrafos disponibles -->
-        <div class="available-paragraphs">
-          <h3>Available Options:</h3>
-          <div class="paragraphs-list">
-            <div
-              *ngFor="let choice of shuffledChoices"
-              class="paragraph-card"
-              [class.used]="isChoiceUsed(choice.key)"
-              [class.clickable]="selectedGap && !showResults"
-              (click)="!showResults && selectedGap && assignParagraphToGap(choice.key)"
-            >
-              <div class="paragraph-header">
-                <span class="paragraph-label">{{ choice.displayKey || choice.key }}</span>
-                <span *ngIf="isChoiceUsed(choice.key)" class="used-in">
-                  ✓ Gap {{ getGapForChoice(choice.key) }}
-                </span>
-              </div>
-              <p class="paragraph-text">{{ choice.value }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Resultados -->
-        <div *ngIf="showResults" class="results-summary">
-          <mat-icon>{{ getCorrectGapsCount(exercise) === getTotalGaps(exercise.payload.text) ? 'check_circle' : 'pending' }}</mat-icon>
-          <p>
-            You got <strong>{{ getCorrectGapsCount(exercise) }}</strong> out of
-            <strong>{{ getTotalGaps(exercise.payload.text) }}</strong> correct!
-          </p>
-        </div>
       </div>
 
       <!-- Signs (imágenes con preguntas de opción múltiple) -->
@@ -1343,7 +1343,7 @@
     <div class="exercise-controls">
       <!-- Botón para verificar respuestas (Missing Paragraphs / Missing Sentences) -->
       <button
-        *ngIf="exercise.payload.text && hasMissingGaps(exercise.payload.text) && exercise.payload.choices && !exercise.payload.compact_choices && !showResults"
+        *ngIf="exercise.payload.text && hasMissingGaps(exercise.payload.text) && (exercise.payload.choices || exercise.payload.compact_choices) && !exercise.payload.compact_solutions && !showResults"
         mat-raised-button
         color="primary"
         (click)="checkAnswers()"
