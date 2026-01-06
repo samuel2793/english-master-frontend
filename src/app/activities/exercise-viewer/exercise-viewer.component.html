@@ -1317,16 +1317,6 @@
           </div>
         </div>
 
-        <!-- Choices/Opciones disponibles (solo mostrar si no está en modo interactivo) -->
-        <div *ngIf="exercise.payload.choices && isArray(exercise.payload.choices) && exercise.payload.choices.length > 0" class="choices-info">
-          <h4>Available Choices:</h4>
-          <div class="choices-list">
-            <span *ngFor="let choice of exercise.payload.choices; let last = last" class="choice-badge">
-              {{ choice }}<span *ngIf="!last">, </span>
-            </span>
-          </div>
-        </div>
-
         <!-- Resultados -->
         <div *ngIf="showResults && exercise.payload.solutions" class="results-summary">
           <mat-icon>{{ getCorrectCount(exercise.payload.solutions) === getObjectKeys(exercise.payload.questions).length ? 'check_circle' : 'pending' }}</mat-icon>
@@ -1573,13 +1563,14 @@
     </div>
 
     <!-- Raw Data global (fallback para cualquier tipo de ejercicio si es admin) -->
-    <!-- Excluir templates que ya tienen su propio Raw Data: Listening Extracts, Gapped Text, Multiple Choice -->
+    <!-- Excluir templates que ya tienen su propio Raw Data: Listening Extracts, Gapped Text, Multiple Choice, Cross Matching -->
     <ng-container *ngIf="exercise$ | async as exercise">
       <details class="raw-data" *ngIf="isAdmin &&
                                         !(exercise.payload.audio && exercise.payload.questions && exercise.payload.choices && exercise.payload.headline && exercise.payload.headline.includes('//')) &&
                                         !(exercise.payload.audio && exercise.payload.text && exercise.payload.solutions && !exercise.payload.questions) &&
                                         !(exercise.payload.audio && exercise.payload.questions && exercise.payload.choices && (!exercise.payload.headline || !exercise.payload.headline.includes('//'))) &&
-                                        !(exercise.payload.audio && exercise.payload.sentences && exercise.payload.solutions)"
+                                        !(exercise.payload.audio && exercise.payload.sentences && exercise.payload.solutions) &&
+                                        !(exercise.payload.questions && !isArray(exercise.payload.questions) && !exercise.payload.audio && exercise.payload.solutions)"
                style="margin-top: 32px;">
         <summary>View Raw Data</summary>
         <pre>{{ formatJson(exercise.payload) }}</pre>
