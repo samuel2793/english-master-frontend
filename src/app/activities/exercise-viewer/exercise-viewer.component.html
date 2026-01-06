@@ -974,7 +974,7 @@
     </div>
 
     <!-- Open Cloze (texto con huecos numerados sin opciones, el usuario escribe la respuesta) -->
-    <div *ngIf="!exercise.payload.audio && exercise.payload.text && exercise.payload.compact_solutions && !exercise.payload.compact_choices && !exercise.payload.compact_keywords && !exercise.payload.compact_challenges && !hasWordFormationPattern(exercise.payload.text)" class="open-cloze-section">
+    <div *ngIf="!exercise.payload.audio && exercise.payload.text && exercise.payload.compact_solutions && !exercise.payload.compact_choices && !exercise.payload.compact_keywords && !exercise.payload.compact_challenges && !exercise.payload.compact_questions && !hasWordFormationPattern(exercise.payload.text)" class="open-cloze-section">
       <!-- Título -->
       <div *ngIf="exercise.payload.title" class="exercise-header">
         <h2>{{ exercise.payload.title }}</h2>
@@ -1163,9 +1163,56 @@
       </div>
     </div>
 
+    <!-- Preguntas compactas (Long Text con compact_questions y compact_answers) -->
+    <div *ngIf="exercise.payload.compact_questions && exercise.payload.compact_answers" class="questions-section">
+      <!-- Texto del Long Text -->
+      <div *ngIf="exercise.payload.text" class="main-text">
+        <p class="text-content" style="white-space: pre-line;">{{ formatTextWithBreaks(exercise.payload.text) }}</p>
+      </div>
+
+      <h3>Questions</h3>
+      <div *ngFor="let key of getObjectKeys(exercise.payload.compact_questions)" class="question-item">
+        <p class="question">
+          <strong>{{ key }}.</strong> {{ exercise.payload.compact_questions[key] }}
+        </p>
+
+        <!-- Selector de respuesta interactivo con opciones múltiples -->
+        <div class="answer-selector vertical">
+          <button
+            *ngFor="let choice of getShuffledAnswers(key); let i = index"
+            mat-stroked-button
+            [color]="userAnswers[key] === choice ? 'primary' : ''"
+            [class.selected]="userAnswers[key] === choice && !showResults"
+            [class.correct]="showResults && userAnswers[key] === choice && isCorrectAnswer(key, exercise.payload.compact_solutions)"
+            [class.incorrect]="showResults && userAnswers[key] === choice && !isCorrectAnswer(key, exercise.payload.compact_solutions)"
+            [disabled]="showResults"
+            (click)="selectAnswer(key, choice)"
+          >
+            <span class="choice-label">{{ getChoiceLabel(i) }}.</span>
+            <span class="choice-text">{{ choice }}</span>
+          </button>
+        </div>
+
+        <!-- Mostrar respuesta correcta si está mal -->
+        <div *ngIf="showResults && !isCorrectAnswer(key, exercise.payload.compact_solutions) && exercise.payload.compact_solutions && exercise.payload.compact_solutions[key]" class="correct-answer">
+          <mat-icon>info</mat-icon>
+          <span>Correct answer: {{ exercise.payload.compact_solutions[key] }}</span>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div *ngIf="showResults && exercise.payload.compact_solutions" class="results-summary">
+        <mat-icon>{{ getCorrectCount(exercise.payload.compact_solutions) === getObjectKeys(exercise.payload.compact_questions).length ? 'check_circle' : 'pending' }}</mat-icon>
+        <p>
+          You got <strong>{{ getCorrectCount(exercise.payload.compact_solutions) }}</strong> out of
+          <strong>{{ getObjectKeys(exercise.payload.compact_questions).length }}</strong> correct!
+        </p>
+      </div>
+    </div>
+
     <!-- Listening / Reading / Use of English (Generic) -->
     <div
-      *ngIf="!isGrammarTest() && !isSpeaking() && !isWriting() && !isMatching() && !exercise.payload.people && !exercise.payload.audio && !exercise.payload.compact_keywords && !exercise.payload.compact_choices && !(exercise.payload.text && exercise.payload.compact_solutions && !exercise.payload.compact_challenges) && exercise.payload"
+      *ngIf="!isGrammarTest() && !isSpeaking() && !isWriting() && !isMatching() && !exercise.payload.people && !exercise.payload.audio && !exercise.payload.compact_keywords && !exercise.payload.compact_choices && !exercise.payload.compact_questions && !(exercise.payload.text && exercise.payload.compact_solutions && !exercise.payload.compact_challenges) && exercise.payload"
       class="generic-exercise"
     >
       <!-- Título y subtítulo -->
@@ -1235,48 +1282,6 @@
           <p>
             You got <strong>{{ getCorrectCount(exercise.payload.compact_solutions) }}</strong> out of
             <strong>{{ getObjectKeys(exercise.payload.compact_choices).length }}</strong> correct!
-          </p>
-        </div>
-      </div>
-
-      <!-- Preguntas compactas (Long Text con compact_questions y compact_answers) -->
-      <div *ngIf="exercise.payload.compact_questions && exercise.payload.compact_answers" class="questions-section">
-        <h3>Questions</h3>
-        <div *ngFor="let key of getObjectKeys(exercise.payload.compact_questions)" class="question-item">
-          <p class="question">
-            <strong>{{ key }}.</strong> {{ exercise.payload.compact_questions[key] }}
-          </p>
-
-          <!-- Selector de respuesta interactivo con opciones múltiples -->
-          <div class="answer-selector vertical">
-            <button
-              *ngFor="let choice of getShuffledAnswers(key); let i = index"
-              mat-stroked-button
-              [color]="userAnswers[key] === choice ? 'primary' : ''"
-              [class.selected]="userAnswers[key] === choice && !showResults"
-              [class.correct]="showResults && userAnswers[key] === choice && isCorrectAnswer(key, exercise.payload.compact_solutions)"
-              [class.incorrect]="showResults && userAnswers[key] === choice && !isCorrectAnswer(key, exercise.payload.compact_solutions)"
-              [disabled]="showResults"
-              (click)="selectAnswer(key, choice)"
-            >
-              <span class="choice-label">{{ getChoiceLabel(i) }}.</span>
-              <span class="choice-text">{{ choice }}</span>
-            </button>
-          </div>
-
-          <!-- Mostrar respuesta correcta si está mal -->
-          <div *ngIf="showResults && !isCorrectAnswer(key, exercise.payload.compact_solutions) && exercise.payload.compact_solutions && exercise.payload.compact_solutions[key]" class="correct-answer">
-            <mat-icon>info</mat-icon>
-            <span>Correct answer: {{ exercise.payload.compact_solutions[key] }}</span>
-          </div>
-        </div>
-
-        <!-- Resultados -->
-        <div *ngIf="showResults && exercise.payload.compact_solutions" class="results-summary">
-          <mat-icon>{{ getCorrectCount(exercise.payload.compact_solutions) === getObjectKeys(exercise.payload.compact_questions).length ? 'check_circle' : 'pending' }}</mat-icon>
-          <p>
-            You got <strong>{{ getCorrectCount(exercise.payload.compact_solutions) }}</strong> out of
-            <strong>{{ getObjectKeys(exercise.payload.compact_questions).length }}</strong> correct!
           </p>
         </div>
       </div>
@@ -1403,7 +1408,7 @@
 
       <!-- Botón para verificar respuestas (Multiple Choice Cloze) -->
       <button
-        *ngIf="!exercise.payload.audio && exercise.payload.text && exercise.payload.compact_choices && exercise.payload.compact_solutions && !exercise.payload.compact_keywords && !showResults"
+        *ngIf="!exercise.payload.audio && exercise.payload.text && exercise.payload.compact_choices && exercise.payload.compact_solutions && !exercise.payload.compact_keywords && !exercise.payload.compact_answers && !showResults"
         mat-raised-button
         color="primary"
         (click)="checkAnswers()"
@@ -1415,7 +1420,7 @@
 
       <!-- Botón para verificar respuestas (Open Cloze) -->
       <button
-        *ngIf="!exercise.payload.audio && exercise.payload.text && exercise.payload.compact_solutions && !exercise.payload.compact_choices && !exercise.payload.compact_keywords && !exercise.payload.compact_challenges && !hasWordFormationPattern(exercise.payload.text) && !showResults"
+        *ngIf="!exercise.payload.audio && exercise.payload.text && exercise.payload.compact_solutions && !exercise.payload.compact_choices && !exercise.payload.compact_keywords && !exercise.payload.compact_challenges && !exercise.payload.compact_answers && !hasWordFormationPattern(exercise.payload.text) && !showResults"
         mat-raised-button
         color="primary"
         (click)="checkAnswers()"
@@ -1427,7 +1432,7 @@
 
       <!-- Botón para verificar respuestas (Word Formation) -->
       <button
-        *ngIf="!exercise.payload.audio && exercise.payload.text && exercise.payload.compact_solutions && !exercise.payload.compact_choices && !exercise.payload.compact_keywords && !exercise.payload.compact_challenges && hasWordFormationPattern(exercise.payload.text) && !showResults"
+        *ngIf="!exercise.payload.audio && exercise.payload.text && exercise.payload.compact_solutions && !exercise.payload.compact_choices && !exercise.payload.compact_keywords && !exercise.payload.compact_challenges && !exercise.payload.compact_answers && hasWordFormationPattern(exercise.payload.text) && !showResults"
         mat-raised-button
         color="primary"
         (click)="checkAnswers()"
@@ -1497,9 +1502,21 @@
         Check Answers
       </button>
 
-      <!-- Botón para verificar respuestas (ejercicios interactivos con compact_questions) -->
+      <!-- Botón para verificar respuestas (ejercicios interactivos con compact_questions pero sin compact_answers - excluye Long Text) -->
       <button
-        *ngIf="exercise.payload.compact_questions && exercise.payload.compact_solutions && !exercise.payload.compact_choices && !showResults"
+        *ngIf="exercise.payload.compact_questions && exercise.payload.compact_solutions && !exercise.payload.compact_choices && !exercise.payload.compact_answers && !showResults"
+        mat-raised-button
+        color="primary"
+        (click)="checkAnswers()"
+        [disabled]="getObjectKeys(userAnswers).length === 0"
+      >
+        <mat-icon>check</mat-icon>
+        Check Answers
+      </button>
+
+      <!-- Botón para verificar respuestas (Long Text con compact_questions y compact_answers) -->
+      <button
+        *ngIf="exercise.payload.compact_questions && exercise.payload.compact_answers && exercise.payload.compact_solutions && !showResults"
         mat-raised-button
         color="primary"
         (click)="checkAnswers()"

@@ -270,6 +270,193 @@
       }
     }
   }
+
+  // Estilos para Long Text (compact_questions + compact_answers)
+  .questions-section {
+    h3 {
+      color: #667eea;
+      margin-bottom: 24px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .main-text {
+      margin-bottom: 32px;
+
+      .text-content {
+        font-size: 16px;
+        line-height: 1.8;
+        color: #2c3e50;
+        text-align: justify;
+      }
+    }
+
+    .question-item {
+      margin-bottom: 24px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 12px;
+
+      .question {
+        margin-bottom: 16px;
+        color: #2c3e50;
+        line-height: 1.6;
+        font-size: 15px;
+
+        strong {
+          color: #667eea;
+        }
+      }
+
+      .answer-selector {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 12px;
+
+        &.vertical {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        button {
+          flex: 1;
+          min-width: 150px;
+          padding: 12px 20px;
+          font-size: 14px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          text-align: left;
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+          white-space: normal !important;
+          height: auto !important;
+          line-height: 1.4;
+
+          .choice-label {
+            flex-shrink: 0;
+            font-weight: 700;
+            color: #667eea;
+          }
+
+          .choice-text {
+            flex: 1;
+            line-height: 1.4;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+          }
+
+          &.selected {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
+            border-width: 2px;
+          }
+
+          &.correct {
+            background: rgba(76, 175, 80, 0.15);
+            border-color: #4caf50;
+            color: #4caf50;
+
+            .choice-label,
+            .choice-text {
+              color: #4caf50;
+            }
+          }
+
+          &.incorrect {
+            background: rgba(244, 67, 54, 0.15);
+            border-color: #f44336;
+            color: #f44336;
+
+            .choice-label,
+            .choice-text {
+              color: #f44336;
+            }
+          }
+        }
+      }
+
+      .correct-answer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+        padding: 12px;
+        background: rgba(76, 175, 80, 0.1);
+        border-radius: 8px;
+        color: #4caf50;
+        font-size: 14px;
+
+        mat-icon {
+          color: #4caf50;
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+
+      .options {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 12px;
+
+        .option {
+          padding: 10px 14px;
+          background: white;
+          border-radius: 6px;
+          border: 1px solid #e0e0e0;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          line-height: 1.5;
+        }
+      }
+
+      .answer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px;
+        background: rgba(76, 175, 80, 0.1);
+        border-radius: 6px;
+        color: #4caf50;
+        font-weight: 600;
+
+        mat-icon {
+          color: #4caf50;
+        }
+      }
+    }
+
+    .results-summary {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px;
+      background: rgba(102, 126, 234, 0.1);
+      border-radius: 12px;
+      margin-top: 24px;
+
+      mat-icon {
+        color: #667eea;
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+      }
+
+      p {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 16px;
+
+        strong {
+          color: #667eea;
+          font-weight: 700;
+        }
+      }
+    }
+  }
 }
 
 // Grammar Tests
@@ -2861,65 +3048,7 @@
     margin-bottom: 32px;
     line-height: 1.8;
     color: #2c3e50;
-  }
-
-  .questions-section {
-    h3 {
-      color: #667eea;
-      margin-bottom: 24px;
-    }
-
-    .question-item {
-      margin-bottom: 24px;
-      padding: 20px;
-      background: #f8f9fa;
-      border-radius: 12px;
-
-      .question {
-        margin-bottom: 16px;
-        color: #2c3e50;
-        line-height: 1.6;
-
-        strong {
-          color: #667eea;
-        }
-      }
-
-      .options {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-bottom: 12px;
-
-        .option {
-          padding: 10px 14px;
-          background: white;
-          border-radius: 6px;
-          border: 1px solid #e0e0e0;
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-          line-height: 1.5;
-        }
-      }
-
-      .answer {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 12px;
-        background: rgba(76, 175, 80, 0.1);
-        border-radius: 6px;
-        color: #4caf50;
-        font-weight: 600;
-
-        mat-icon {
-          color: #4caf50;
-        }
-      }
-    }
-  }
-
-  .raw-data {
+  }  .raw-data {
     margin-top: 32px;
     padding: 16px;
     background: #f5f5f5;
