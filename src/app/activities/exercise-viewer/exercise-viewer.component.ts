@@ -680,17 +680,40 @@ export class ExerciseViewerComponent implements OnInit {
   }
 
   // Obtener el pool completo de choices (como objetos {key, value, displayKey})
-  getChoicePool(compactChoices: any): any[] {
+  getChoicePool(compactChoices: any, key?: string): any[] {
     if (!compactChoices) return [];
-    // Si ya tenemos shuffledChoices (preparadas en loadExercise), úsalas
-    if (this.shuffledChoices && this.shuffledChoices.length > 0) return this.shuffledChoices;
 
-    // Convertir compactChoices objeto a array de objetos
-    return Object.entries(compactChoices).map(([k, v], index) => ({
-      key: k?.toString(),
-      value: v,
-      displayKey: String.fromCharCode(97 + index) // a, b, c...
-    }));
+    // Si ya tenemos shuffledChoices y no se solicita un key, úsalas (compatibilidad)
+    if (!key && this.shuffledChoices && this.shuffledChoices.length > 0) return this.shuffledChoices;
+
+    // Si se solicita un key concreto, devolver las opciones para ese hueco
+    if (key) {
+      const entry = compactChoices[key];
+      if (entry === undefined || entry === null) return [];
+      if (Array.isArray(entry)) {
+        return entry.map((val: any, idx: number) => ({ key: key?.toString(), value: val, displayKey: String.fromCharCode(97 + idx) }));
+      }
+      if (typeof entry === 'string') {
+        return entry.split(',').map((s: string, idx: number) => ({ key: key?.toString(), value: s.trim(), displayKey: String.fromCharCode(97 + idx) }));
+      }
+      if (typeof entry === 'object') {
+        return Object.values(entry).map((val: any, idx: number) => ({ key: key?.toString(), value: val, displayKey: String.fromCharCode(97 + idx) }));
+      }
+      return [];
+    }
+
+    // Sin key: construir pool plano con todas las opciones (por si acaso)
+    return Object.keys(compactChoices)
+      .sort((a, b) => parseInt(a) - parseInt(b))
+      .reduce((acc: any[], k: string) => {
+        const entry = compactChoices[k];
+        if (Array.isArray(entry)) {
+          entry.forEach((val: any, idx: number) => acc.push({ key: k?.toString(), value: val, displayKey: String.fromCharCode(97 + idx) }));
+        } else if (typeof entry === 'string') {
+          entry.split(',').map((s: string) => s.trim()).forEach((val: any, idx: number) => acc.push({ key: k?.toString(), value: val, displayKey: String.fromCharCode(97 + idx) }));
+        }
+        return acc;
+      }, [] as any[]);
   }
 
   getImageByKey(images: any[], key: string): string {

@@ -970,7 +970,7 @@
           </div>
           <div class="choice-options">
             <button
-              *ngFor="let choice of getChoicePool(exercise.payload.compact_choices); let i = index"
+              *ngFor="let choice of getChoicePool(exercise.payload.compact_choices, key); let i = index"
               mat-stroked-button
               [color]="userAnswers[key] === choice.value ? 'primary' : ''"
               [class.selected]="userAnswers[key] === choice.value && !showResults"
