@@ -28,6 +28,39 @@
   </div>
 
   <div *ngIf="exercise$ | async as exercise" class="exercise-content">
+    <!-- Signs interactive section (images + selectable options) -->
+
+    <!-- Minimal signs preview (diagnostic) -->
+      <!-- Signs interactive section -->
+      <div *ngIf="exercise.payload && (exercise.payload.compact_images || exercise.payload.images) && exercise.payload.compact_choices" class="signs-section" style="border:1px dashed #999;padding:12px;margin-bottom:16px;border-radius:6px;background:#fbfbfe;">
+        <h3 *ngIf="exercise.payload.title" style="margin:0 0 8px 0;font-size:1.1rem;color:#222">{{ exercise.payload.title }}</h3>
+        <div *ngFor="let k of getSignKeys(exercise.payload)" class="sign-item" style="display:flex;flex-direction:column;align-items:center;margin:16px 0;padding:12px;background:#fff;border-radius:6px;box-shadow:0 1px 0 rgba(0,0,0,0.04);">
+          <div style="width:100%;max-width:920px;height:420px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;">
+            <img [src]="(exercise.payload.compact_images ? exercise.payload.compact_images[k] : getImageByKey(exercise.payload.images, k))"
+                 alt="Sign {{k}}" style="width:100%;height:100%;object-fit:contain;border-radius:6px;" (error)="onImageError($event)" />
+          </div>
+
+          <div style="width:100%;max-width:920px;">
+            <div style="margin-bottom:10px;color:#333;font-size:1rem;"><strong style="margin-right:8px;color:#111">{{ k }}.</strong><span>{{ getSignQuestion(exercise.payload.compact_choices?.[k] || (exercise.payload.choices && getChoiceText(exercise.payload.choices, k))) }}</span></div>
+
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <button *ngFor="let opt of getCompactChoices(exercise.payload.compact_choices, k)"
+                      mat-stroked-button
+                      color="primary"
+                      (click)="selectAnswer(k, opt)"
+                      [disabled]="showResults"
+                      style="width:100%;text-align:left;padding:12px 14px;border-radius:6px;white-space:normal;justify-content:flex-start;"
+                      [ngStyle]="getOptionStyles(k, opt, exercise.payload.compact_solutions || exercise.payload.solutions)">
+                {{ opt }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="results-summary" *ngIf="showResults" style="margin-top:12px;">
+          <p style="margin:0;color:#333;">Correct: <strong>{{ getCorrectCount(exercise.payload.compact_solutions || exercise.payload.solutions) }}</strong> / <strong>{{ getObjectKeys(exercise.payload.compact_images || exercise.payload.images).length }}</strong></p>
+        </div>
+      </div>
     <!-- Grammar Tests -->
     <div *ngIf="isGrammarTest() && exercise.payload && exercise.payload.questions" class="grammar-test">
       <div *ngFor="let question of exercise.payload.questions; let i = index" class="question-block">
@@ -1238,7 +1271,14 @@
       <!-- Signs (imágenes con preguntas de opción múltiple) -->
       <div *ngIf="(exercise.payload.compact_images || exercise.payload.images) && exercise.payload.compact_choices" class="signs-section">
         <h3>Look at the signs and choose the correct answer</h3>
-        <div *ngFor="let key of getObjectKeys(exercise.payload.compact_choices)" class="sign-item">
+        <!-- Debug info para Signs (temporal) -->
+        <div class="signs-debug">
+          <pre style="white-space:pre-wrap;">keys: {{ getSignKeys(exercise.payload) | json }}</pre>
+          <pre style="white-space:pre-wrap;">hasCompactImages: {{ !!exercise.payload.compact_images }}</pre>
+          <pre style="white-space:pre-wrap;">hasImagesArray: {{ !!exercise.payload.images }}</pre>
+          <pre style="white-space:pre-wrap;">hasCompactChoices: {{ !!exercise.payload.compact_choices }}</pre>
+        </div>
+        <div *ngFor="let key of getSignKeys(exercise.payload)" class="sign-item">
           <div class="sign-image">
             <img
               [src]="exercise.payload.compact_images ? exercise.payload.compact_images[key] : getImageByKey(exercise.payload.images, key)"

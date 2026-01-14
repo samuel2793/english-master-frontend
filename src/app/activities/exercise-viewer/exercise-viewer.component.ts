@@ -637,6 +637,24 @@ export class ExerciseViewerComponent implements OnInit {
     }
   }
 
+  // Obtener las keys adecuadas para la sección Signs, respetando compact_images/images/compact_choices
+  getSignKeys(payload: any): string[] {
+    if (!payload) return [];
+    // Preferir compact_images (usualmente tiene las keys correctas como strings)
+    if (payload.compact_images) {
+      return Object.keys(payload.compact_images).sort((a: string, b: string) => parseInt(a) - parseInt(b));
+    }
+    // Si hay images como array, usar sus keys
+    if (payload.images && Array.isArray(payload.images)) {
+      return payload.images.map((img: any) => img.key?.toString()).filter((k: any) => k !== undefined && k !== null);
+    }
+    // Finalmente, si solo existe compact_choices, usar sus keys
+    if (payload.compact_choices) {
+      return Object.keys(payload.compact_choices).sort((a: string, b: string) => parseInt(a) - parseInt(b));
+    }
+    return [];
+  }
+
   // Normalizar compact_choices[key] a un array seguro para usar en *ngFor
   getCompactChoices(compactChoices: any, key: string): string[] {
     if (!compactChoices) return [];
@@ -678,6 +696,22 @@ export class ExerciseViewerComponent implements OnInit {
   getImageByKey(images: any[], key: string): string {
     const image = images?.find(img => img.key?.toString() === key);
     return image ? image.value : '';
+  }
+
+  // Devuelve estilos inline para una opción (seleccionada, correcta, incorrecta)
+  getOptionStyles(questionKey: string, option: string, solutions: any): any {
+    const isSelected = this.userAnswers[questionKey] === option;
+    const correct = solutions && solutions[questionKey] === option;
+    const incorrect = this.showResults && isSelected && !correct;
+
+    if (this.showResults) {
+      if (correct) return { 'background': '#d4edda', 'border-color': '#c3e6cb' };
+      if (incorrect) return { 'background': '#f8d7da', 'border-color': '#f5c6cb' };
+      return { 'opacity': '0.95' };
+    }
+
+    if (isSelected) return { 'background': '#e6f0ff' };
+    return {};
   }
 
   // Método para obtener las opciones de Listening Extracts
