@@ -930,23 +930,24 @@
 
       <!-- Opciones para cada hueco -->
       <div class="choices-grid">
-        <div *ngFor="let key of getObjectKeys(exercise.payload.compact_choices)" class="choice-group">
+        <!-- Iterar sobre los gaps (keys de compact_solutions) -->
+        <div *ngFor="let key of getObjectKeys(exercise.payload.compact_solutions)" class="choice-group">
           <div class="choice-header">
             <span class="choice-number">{{ key }}</span>
           </div>
           <div class="choice-options">
             <button
-              *ngFor="let choice of exercise.payload.compact_choices[key]; let i = index"
+              *ngFor="let choice of getChoicePool(exercise.payload.compact_choices); let i = index"
               mat-stroked-button
-              [color]="userAnswers[key] === choice ? 'primary' : ''"
-              [class.selected]="userAnswers[key] === choice && !showResults"
-              [class.correct]="showResults && userAnswers[key] === choice && exercise.payload.compact_solutions[key] === choice"
-              [class.incorrect]="showResults && userAnswers[key] === choice && exercise.payload.compact_solutions[key] !== choice"
+              [color]="userAnswers[key] === choice.value ? 'primary' : ''"
+              [class.selected]="userAnswers[key] === choice.value && !showResults"
+              [class.correct]="showResults && userAnswers[key] === choice.value && exercise.payload.compact_solutions[key] === choice.value"
+              [class.incorrect]="showResults && userAnswers[key] === choice.value && exercise.payload.compact_solutions[key] !== choice.value"
               [disabled]="showResults"
-              (click)="selectAnswer(key, choice)"
+              (click)="selectAnswer(key, choice.value)"
             >
-              <span class="option-label">{{ getChoiceLabel(i) }}</span>
-              <span class="option-text">{{ choice }}</span>
+              <span class="option-label">{{ choice.displayKey?.toUpperCase() || getChoiceLabel(i) }}</span>
+              <span class="option-text">{{ choice.value }}</span>
             </button>
           </div>
           <!-- Feedback -->

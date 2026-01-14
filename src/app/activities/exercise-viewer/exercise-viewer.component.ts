@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -43,6 +44,7 @@ export class ExerciseViewerComponent implements OnInit {
     private activitiesService: ActivitiesService,
     private authService: AuthService,
     private cdr: ChangeDetectorRef
+    , private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -103,12 +105,14 @@ export class ExerciseViewerComponent implements OnInit {
 
       // Aleatorizar opciones para Missing Paragraphs/Sentences
       if (exercise?.payload?.choices && Array.isArray(exercise.payload.choices)) {
-        this.shuffledChoices = this.shuffleAndRelabelChoices([...exercise.payload.choices]);
+        // Convert keys to strings before shuffling to keep key types consistent
+        const normalizedChoices = exercise.payload.choices.map((c: any) => ({ ...c, key: c.key !== undefined && c.key !== null ? c.key.toString() : c.key }));
+        this.shuffledChoices = this.shuffleAndRelabelChoices([...normalizedChoices]);
         console.log('✅ Shuffled choices (array):', this.shuffledChoices);
       } else if (exercise?.payload?.compact_choices) {
         // Si tiene compact_choices, convertirlo a array
         const choicesArray = Object.entries(exercise.payload.compact_choices).map(([key, value]) => ({
-          key,
+          key: key.toString(),
           value,
           displayKey: key.toUpperCase()
         }));
@@ -141,6 +145,8 @@ export class ExerciseViewerComponent implements OnInit {
     const alphabet = 'abcdefghijklmnopqrstuvwxyz';
     return shuffled.map((choice, index) => ({
       ...choice,
+      // Asegurar que la key sea string para comparaciones coherentes
+      key: choice.key !== undefined && choice.key !== null ? choice.key.toString() : choice.key,
       displayKey: alphabet[index] // Nueva clave para mostrar
     }));
   }  shuffleCompactAnswers(compactAnswers: any): { [questionKey: string]: string[] } {
@@ -433,14 +439,14 @@ export class ExerciseViewerComponent implements OnInit {
   }
 
   getChoiceText(choices: any[], key: string): string {
-    const choice = choices.find(c => c.key === key);
+    const choice = choices.find(c => c.key?.toString() === key?.toString());
     return choice ? choice.value : '';
   }
 
   getDisplayKey(originalKey: string): string {
-    // Buscar en shuffledChoices la displayKey correspondiente
-    const choice = this.shuffledChoices.find(c => c.key === originalKey);
-    return choice?.displayKey || originalKey;
+    // Buscar en shuffledChoices la displayKey correspondiente (usar toString para robustez)
+    const choice = this.shuffledChoices.find(c => c.key?.toString() === originalKey?.toString());
+    return choice?.displayKey || originalKey?.toString();
   }
 
   getAvailableChoices(choices: any[]): any[] {
@@ -541,8 +547,8 @@ export class ExerciseViewerComponent implements OnInit {
     // Para Missing Paragraphs (orden alfabético)
     if (isMissingParagraphs && exercise.payload.choices) {
       const expectedKey = this.getExpectedAnswerForGap(parseInt(gapIndex));
-      const correctChoice = this.shuffledChoices.find((c: any) => c.key === expectedKey);
-      return correctChoice?.displayKey || expectedKey;
+      const correctChoice = this.shuffledChoices.find((c: any) => c.key?.toString() === expectedKey?.toString());
+      return correctChoice?.displayKey || expectedKey?.toString();
     }
 
     return '';
@@ -597,10 +603,14 @@ export class ExerciseViewerComponent implements OnInit {
   }
 
   // Métodos para ejercicios de Signs
-  getSignQuestion(choiceText: string): string {
+  getSignQuestion(choiceText: any): string {
     // Formato con pregunta: "Pregunta||opción1//opción2//opción3"
     // Formato sin pregunta: "opción1//opción2//opción3"
     if (!choiceText) return '';
+    if (Array.isArray(choiceText)) {
+      // Si viene como array, no hay pregunta incluida
+      return '';
+    }
     if (choiceText.includes('||')) {
       return choiceText.split('||')[0];
     }
@@ -608,10 +618,13 @@ export class ExerciseViewerComponent implements OnInit {
     return '';
   }
 
-  getSignChoices(choiceText: string): string[] {
+  getSignChoices(choiceText: any): string[] {
     // Formato con pregunta: "Pregunta||opción1//opción2//opción3"
     // Formato sin pregunta: "opción1//opción2//opción3"
     if (!choiceText) return [];
+    if (Array.isArray(choiceText)) {
+      return choiceText.map(c => (c || '').toString().trim());
+    }
 
     if (choiceText.includes('||')) {
       // Tiene pregunta, extraer las opciones después de ||
@@ -622,6 +635,44 @@ export class ExerciseViewerComponent implements OnInit {
       // No tiene pregunta, todo el texto son las opciones separadas por //
       return choiceText.split('//').map(c => c.trim());
     }
+  }
+
+  // Normalizar compact_choices[key] a un array seguro para usar en *ngFor
+  getCompactChoices(compactChoices: any, key: string): string[] {
+    if (!compactChoices) return [];
+    const entry = compactChoices[key];
+    if (!entry && entry !== '') return [];
+    if (Array.isArray(entry)) return entry.map(e => (e || '').toString());
+    if (typeof entry === 'string') {
+      // Si las opciones están separadas por '//' (formato común), dividirlas
+      if (entry.includes('//')) return entry.split('//').map(s => s.trim());
+      // Si contiene '||' (signs), extraer la parte de opciones si existe
+      if (entry.includes('||')) {
+        const parts = entry.split('||');
+        if (parts.length > 1) return parts[1].split('//').map(s => s.trim());
+      }
+      // Valor simple -> devolver como array de un elemento
+      return [entry];
+    }
+    if (typeof entry === 'object') {
+      // Convertir objeto a array de valores
+      return Object.values(entry).map(v => (v || '').toString());
+    }
+    return [];
+  }
+
+  // Obtener el pool completo de choices (como objetos {key, value, displayKey})
+  getChoicePool(compactChoices: any): any[] {
+    if (!compactChoices) return [];
+    // Si ya tenemos shuffledChoices (preparadas en loadExercise), úsalas
+    if (this.shuffledChoices && this.shuffledChoices.length > 0) return this.shuffledChoices;
+
+    // Convertir compactChoices objeto a array de objetos
+    return Object.entries(compactChoices).map(([k, v], index) => ({
+      key: k?.toString(),
+      value: v,
+      displayKey: String.fromCharCode(97 + index) // a, b, c...
+    }));
   }
 
   getImageByKey(images: any[], key: string): string {
@@ -848,7 +899,7 @@ export class ExerciseViewerComponent implements OnInit {
   }
 
   // Funciones para Multiple Choice Cloze
-  getMultipleChoiceClozeText(text: string, choices: any): string {
+  getMultipleChoiceClozeText(text: string, choices: any): SafeHtml {
     if (!text || !choices) return text;
 
     // Reemplazar (0) IS con un span destacado para el ejemplo
@@ -863,7 +914,7 @@ export class ExerciseViewerComponent implements OnInit {
       );
     }
 
-    return processedText;
+    return this.sanitizer.bypassSecurityTrustHtml(processedText);
   }
 
   getMultipleChoiceClozeCorrectCount(solutions: any): number {
