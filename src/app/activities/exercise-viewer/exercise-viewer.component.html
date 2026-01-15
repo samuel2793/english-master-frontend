@@ -304,25 +304,24 @@
 
     <!-- Writing - Email B1 (email format with paragraphs) - MUST BE BEFORE GENERIC -->
     <div *ngIf="isWriting() && exercise.payload?.type === 'Email' && exercise.payload?.from && exercise.payload?.paragraphs && exercise.payload.paragraphs.length > 0" class="writing-email-b1">
-      <div class="email-header">
-        <div class="email-badge">
-          <mat-icon>email</mat-icon>
-          <span>{{ exercise.payload.type || 'Email' }}</span>
-        </div>
-
-        <div class="email-meta">
-          <div class="email-from">
-            <strong>From:</strong> {{ exercise.payload.from }}
-          </div>
-          <div *ngIf="exercise.payload.subject" class="email-subject">
-            <strong>Subject:</strong> {{ exercise.payload.subject }}
+        <div class="speaking-header">
+          <mat-icon color="primary">forum</mat-icon>
+          <div>
+            <div class="speaking-final-title">Part 4 - Final Discussion</div>
+            <div class="speaking-final-level">B2</div>
           </div>
         </div>
-      </div>
-
-      <div class="email-body">
-        <div *ngIf="exercise.payload.opening" class="email-opening">
-          <p>{{ exercise.payload.opening }}</p>
+        <div class="speaking-final-intro">
+          In Part 4, the examiner will ask each candidate questions, and you’ll engage in a discussion with your partner on the given topics.
+        </div>
+        <div class="speaking-final-block-content">
+          <div class="speaking-final-headline">Final Discussion</div>
+          <div class="speaking-final-instruction">The examiner asks you a series of questions for about 1 minute. Pick 1-2 questions of the following list:</div>
+          <ol class="speaking-list">
+            <li *ngFor="let question of exercise.payload.payload.questions" class="speaking-question-item">
+              {{ question }}
+            </li>
+          </ol>
         </div>
 
         <div class="email-paragraphs">
@@ -335,7 +334,6 @@
         <div *ngIf="exercise.payload.closure" class="email-closure">
           <p>{{ exercise.payload.closure }}</p>
         </div>
-      </div>
 
       <div class="writing-instructions">
         <mat-icon>edit</mat-icon>
