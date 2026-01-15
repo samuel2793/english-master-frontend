@@ -1,3 +1,106 @@
+.speaking-exercise {
+  .speaking-image {
+    margin-bottom: 32px;
+    text-align: center;
+    img { /* ... */ }
+  }
+
+  .speaking-questions.styled-block {
+    background: #f8f9fa;
+    border-left: 4px solid #667eea;
+    border-radius: 12px;
+    padding: 24px 28px 20px 28px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.06);
+    transition: box-shadow 0.2s;
+    h3 {
+      display: inline-block;
+      font-size: 1.25em;
+      font-weight: 700;
+      margin: 0 0 12px 0;
+      color: #2d3a4a;
+      vertical-align: middle;
+    }
+    .speaking-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .speaking-list {
+      padding-left: 1.5rem;
+      margin: 0;
+      list-style: decimal inside;
+    }
+    .speaking-question-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 1.08em;
+      color: #222;
+      line-height: 1.5;
+      background: white;
+      border-radius: 6px;
+      padding: 10px 14px;
+      box-shadow: 0 1px 4px rgba(102, 126, 234, 0.04);
+      transition: background 0.2s;
+      &:hover {
+        background: #eef2fb;
+      }
+      mat-icon {
+        margin-top: 2px;
+      }
+    }
+  }
+
+  .speaking-photo-block.styled-block {
+    background: #f8f9fa;
+    border-left: 4px solid #667eea;
+    border-radius: 12px;
+    padding: 24px 28px 20px 28px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.06);
+    transition: box-shadow 0.2s;
+    .speaking-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .speaking-photo-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      .speaking-photo-img {
+        max-width: 340px;
+        width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(102, 126, 234, 0.10);
+        margin-bottom: 8px;
+        border: 2px solid #e9ecef;
+      }
+      .speaking-photo-headline {
+        font-size: 1.12em;
+        color: #2d3a4a;
+        text-align: center;
+        background: #fff;
+        border-radius: 8px;
+        padding: 14px 18px;
+        box-shadow: 0 1px 4px rgba(102, 126, 234, 0.04);
+      }
+    }
+  }
+
+  .speaking-notes {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    background: rgba(33, 150, 243, 0.1);
+    border-radius: 8px;
+    mat-icon { /* ... */ }
+    p { /* ... */ }
+  }
+}
 .viewer-container {
   max-width: 900px;
   margin: 80px auto 0;

@@ -102,6 +102,7 @@
 
     <!-- Speaking (forzar renderizado para depuración) -->
     <div *ngIf="isSpeaking() && exercise.payload" class="speaking-exercise">
+      <!-- Part 1: Questions -->
       <div *ngIf="exercise.payload.payload?.questions && exercise.payload.payload.questions.length > 0" class="speaking-questions styled-block">
         <div class="speaking-header">
           <mat-icon color="primary" style="vertical-align: middle; margin-right: 8px;">record_voice_over</mat-icon>
@@ -114,6 +115,19 @@
           </li>
         </ol>
       </div>
+
+      <!-- Part 2: Photograph Description -->
+      <div *ngIf="exercise.payload.payload?.image && exercise.payload.payload?.headline" class="speaking-photo-block styled-block">
+        <div class="speaking-header">
+          <mat-icon color="primary" style="vertical-align: middle; margin-right: 8px;">photo_camera</mat-icon>
+          <h3>Photograph Description</h3>
+        </div>
+        <div class="speaking-photo-content">
+          <img [src]="'https://englishapps.app/img/speaking/' + level + '/' + exercise.payload.activity.id + '/' + exercise.payload.payload.image + '.jpeg'" alt="Speaking photo" class="speaking-photo-img" />
+          <div class="speaking-photo-headline">{{ exercise.payload.payload.headline }}</div>
+        </div>
+      </div>
+
       <div *ngIf="exercise.payload.payload?.notes" class="speaking-notes">
         <mat-icon>info</mat-icon>
         <p>{{ exercise.payload.payload.notes }}</p>
