@@ -135,8 +135,8 @@
         </div>
       </div>
 
-      <!-- Part 2: Photograph Description -->
-      <div *ngIf="exercise.payload.payload?.image && exercise.payload.payload?.headline" class="speaking-photo-block styled-block">
+      <!-- Part 2: Photograph Description (solo B1, no B2 Part 2) -->
+      <div *ngIf="exercise.payload.payload?.image && exercise.payload.payload?.headline && !(level === 'b2' && exercise.payload.activity.part === 2)" class="speaking-photo-block styled-block">
         <div class="speaking-header">
           <mat-icon color="primary" style="vertical-align: middle; margin-right: 8px;">photo_camera</mat-icon>
           <h3>Photograph Description</h3>
@@ -144,6 +144,32 @@
         <div class="speaking-photo-content">
           <img [src]="'https://englishapps.app/img/speaking/' + level + '/' + exercise.payload.activity.id + '/' + exercise.payload.payload.image + '.jpeg'" alt="Speaking photo" class="speaking-photo-img" />
           <div class="speaking-photo-headline">{{ exercise.payload.payload.headline }}</div>
+        </div>
+      </div>
+
+      <!-- Speaking B2 Part 2: Images -->
+      <div *ngIf="level === 'b2' && exercise.payload.activity.part === 2 && exercise.payload.payload?.image && exercise.payload.payload?.headline" class="speaking-b2-images-block styled-block">
+        <div class="speaking-header">
+          <mat-icon color="primary">collections</mat-icon>
+          <div>
+            <div class="speaking-b2-images-title">Part 2 - Images</div>
+            <div class="speaking-b2-images-level">B2</div>
+          </div>
+        </div>
+        <div class="speaking-b2-images-intro">
+          In Part 2, you talk about your photographs for about 1 minute. Then your partner answers their question.
+        </div>
+        <div class="speaking-b2-images-headline">
+          {{ exercise.payload.payload.headline }}
+        </div>
+        <div class="speaking-b2-images-photo-content">
+          <img [src]="'https://englishapps.app/img/speaking/b2/2/' + exercise.payload.payload.image + '.jpeg'" alt="Speaking B2 Images" class="speaking-photo-img" />
+        </div>
+        <div class="speaking-b2-images-question">
+          <strong>Question:</strong> {{ exercise.payload.payload.question }}
+        </div>
+        <div class="speaking-b2-images-counterpart" *ngIf="exercise.payload.payload.counterpart_question">
+          <strong>Counterpart question:</strong> {{ exercise.payload.payload.counterpart_question }}
         </div>
       </div>
 
