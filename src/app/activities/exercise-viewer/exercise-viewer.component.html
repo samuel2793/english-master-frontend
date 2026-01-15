@@ -102,41 +102,60 @@
 
     <!-- Speaking (forzar renderizado para depuración) -->
     <div *ngIf="isSpeaking() && exercise.payload" class="speaking-exercise">
-      <!-- Part 1: General Questions (Phase 1 + Phase 2) -->
-      <div *ngIf="exercise.payload.activity.part === 1 && exercise.payload.payload?.questions && exercise.payload.payload.questions.length > 0" class="speaking-general-block styled-block">
-        <div class="speaking-header">
-          <mat-icon color="primary" style="vertical-align: middle; margin-right: 8px;">person</mat-icon>
-          <h3>General Questions</h3>
-        </div>
-        <div class="speaking-general-intro">
-          In Part 1, you have a brief conversation with the examiner. Expect 1-2 introductory questions, followed by 2-3 general questions on everyday topics. You have about 2 minutes to complete this part.
-        </div>
-        <div class="speaking-phase-block">
-          <div class="speaking-phase-title">Phase 1 (1 Minute)</div>
-          <div class="speaking-phase-desc">First, we'd like to know a bit about you.</div>
-          <div class="speaking-phase-desc">Pick 2 of the following questions and answer them. Phase 1 rarely changes, it usually involves 1-2 of the following questions.</div>
-          <ol class="speaking-list">
-            <li class="speaking-question-item"><mat-icon color="accent">help_outline</mat-icon>What's your name?</li>
-            <li class="speaking-question-item"><mat-icon color="accent">help_outline</mat-icon>Where are you from?</li>
-            <li class="speaking-question-item"><mat-icon color="accent">help_outline</mat-icon>Do you work or are you a student?</li>
-            <li class="speaking-question-item"><mat-icon color="accent">help_outline</mat-icon>What job do you do?</li>
-            <li class="speaking-question-item"><mat-icon color="accent">help_outline</mat-icon>What subject do you study?</li>
-          </ol>
-        </div>
-        <div class="speaking-phase-block">
-          <div class="speaking-phase-title">Phase 2 (1 Minute)</div>
-          <div class="speaking-phase-desc">Pick 2-3 more questions. There's more variety in Phase 2; that's why each exercise in our list has different questions.</div>
-          <ol class="speaking-list">
-            <li *ngFor="let question of exercise.payload.payload.questions" class="speaking-question-item">
-              <mat-icon color="accent">help_outline</mat-icon>
-              <span>{{ question }}</span>
-            </li>
-          </ol>
-        </div>
-      </div>
+            <!-- Speaking B2 Part 3: Bubbles Discussion -->
+            <div *ngIf="level === 'b2' && exercise.payload.activity.part === 3 && exercise.payload.payload?.image && exercise.payload.payload?.headline" class="speaking-b2-bubbles-block styled-block">
+              <div class="speaking-header">
+                <mat-icon color="primary">bubble_chart</mat-icon>
+                <div>
+                  <div class="speaking-b2-bubbles-title">Part 3 - Bubbles Discussion</div>
+                  <div class="speaking-b2-bubbles-level">B2</div>
+                </div>
+              </div>
+              <div class="speaking-b2-bubbles-headline">
+                {{ exercise.payload.payload.headline }}
+              </div>
+              <div class="speaking-b2-bubbles-photo-content">
+                <img [src]="'https://englishapps.app/img/speaking/b2/3/' + exercise.payload.payload.image + '.jpg'" alt="Bubbles Discussion" class="speaking-photo-img" />
+              </div>
+              <div class="speaking-b2-bubbles-question" *ngIf="exercise.payload.payload.question">
+                <strong>Question:</strong> {{ exercise.payload.payload.question }}
+              </div>
+            </div>
+              <!-- Part 1: General Questions (Phase 1 + Phase 2) -->
+              <div *ngIf="exercise.payload.activity.part === 1 && exercise.payload.payload?.questions && exercise.payload.payload.questions.length > 0" class="speaking-general-block styled-block">
+                <div class="speaking-header">
+                  <mat-icon color="primary" style="vertical-align: middle; margin-right: 8px;">person</mat-icon>
+                  <h3>General Questions</h3>
+                </div>
+                <div class="speaking-general-intro">
+                  In Part 1, you have a brief conversation with the examiner. Expect 1-2 introductory questions, followed by 2-3 general questions on everyday topics. You have about 2 minutes to complete this part.
+                </div>
+                <div class="speaking-phase-block">
+                  <div class="speaking-phase-title">Phase 1 (1 Minute)</div>
+                  <div class="speaking-phase-desc">First, we'd like to know a bit about you.</div>
+                  <div class="speaking-phase-desc">Pick 2 of the following questions and answer them. Phase 1 rarely changes, it usually involves 1-2 of the following questions.</div>
+                  <ol class="speaking-list">
+                    <li class="speaking-question-item"><mat-icon color="accent">help_outline</mat-icon>What's your name?</li>
+                    <li class="speaking-question-item"><mat-icon color="accent">help_outline</mat-icon>Where are you from?</li>
+                    <li class="speaking-question-item"><mat-icon color="accent">help_outline</mat-icon>Do you work or are you a student?</li>
+                    <li class="speaking-question-item"><mat-icon color="accent">help_outline</mat-icon>What job do you do?</li>
+                    <li class="speaking-question-item"><mat-icon color="accent">help_outline</mat-icon>What subject do you study?</li>
+                  </ol>
+                </div>
+                <div class="speaking-phase-block">
+                  <div class="speaking-phase-title">Phase 2 (1 Minute)</div>
+                  <div class="speaking-phase-desc">Pick 2-3 more questions. There's more variety in Phase 2; that's why each exercise in our list has different questions.</div>
+                  <ol class="speaking-list">
+                    <li *ngFor="let question of exercise.payload.payload.questions" class="speaking-question-item">
+                      <mat-icon color="accent">help_outline</mat-icon>
+                      <span>{{ question }}</span>
+                    </li>
+                  </ol>
+                </div>
+              </div>
 
       <!-- Part 2: Photograph Description (solo B1, no B2 Part 2) -->
-      <div *ngIf="exercise.payload.payload?.image && exercise.payload.payload?.headline && !(level === 'b2' && exercise.payload.activity.part === 2)" class="speaking-photo-block styled-block">
+      <div *ngIf="level === 'b1' && exercise.payload.activity.part === 2 && exercise.payload.payload?.image && exercise.payload.payload?.headline" class="speaking-photo-block styled-block">
         <div class="speaking-header">
           <mat-icon color="primary" style="vertical-align: middle; margin-right: 8px;">photo_camera</mat-icon>
           <h3>Photograph Description</h3>
