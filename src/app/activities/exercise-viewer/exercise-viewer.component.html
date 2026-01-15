@@ -198,6 +198,25 @@
       </div>
 
       <!-- Speaking C1 Part 2: Images -->
+              <!-- Speaking C2 Part 2: Images Discussion -->
+              <div *ngIf="level === 'c2' && exercise.payload.activity.part === 2 && exercise.payload.payload?.image && (exercise.payload.payload?.task_1 || exercise.payload.payload?.task_2)" class="speaking-c2-images-block styled-block">
+                <div class="speaking-header">
+                  <mat-icon color="primary">collections</mat-icon>
+                  <div>
+                    <div class="speaking-c2-images-title">Part 2 - Images Discussion</div>
+                    <div class="speaking-c2-images-level">C2</div>
+                  </div>
+                </div>
+                <div class="speaking-c2-images-photo-content">
+                  <img [src]="'https://englishapps.app/img/speaking/c2/2/' + exercise.payload.payload.image + '.jpeg'" alt="Images Discussion" class="speaking-photo-img" />
+                </div>
+                <div *ngIf="exercise.payload.payload.task_1" class="speaking-c2-images-task speaking-c2-images-task-1">
+                  {{ exercise.payload.payload.task_1 }}
+                </div>
+                <div *ngIf="exercise.payload.payload.task_2" class="speaking-c2-images-task speaking-c2-images-task-2">
+                  {{ exercise.payload.payload.task_2 }}
+                </div>
+              </div>
         <!-- Speaking C1 Part 3: Bubbles Discussion -->
         <div *ngIf="level === 'c1' && exercise.payload.activity.part === 3 && exercise.payload.payload?.image && exercise.payload.payload?.headline" class="speaking-c1-bubbles-block styled-block">
           <div class="speaking-header">
