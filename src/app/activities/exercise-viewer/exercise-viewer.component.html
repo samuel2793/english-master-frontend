@@ -167,6 +167,31 @@
         </ol>
       </div>
 
+      <!-- Part 4: Final Discussion -->
+      <div *ngIf="exercise.payload.activity.part === 4 && exercise.payload.payload?.questions && exercise.payload.payload.questions.length > 0" class="speaking-final-block styled-block">
+        <div class="speaking-header">
+          <mat-icon color="primary">forum</mat-icon>
+          <div>
+            <div class="speaking-final-title">Part 4 - Final Discussion</div>
+            <div class="speaking-final-level">B1</div>
+          </div>
+        </div>
+        <div class="speaking-final-intro">
+          In Part 4, the examiner will ask each candidate questions, and you’ll engage in a discussion with your partner on the given topics.
+        </div>
+        <div class="speaking-final-block-content">
+          <div class="speaking-final-subtitle">Final Discussion</div>
+          <div class="speaking-final-instruction">
+            The examiner asks you a series of questions for about 1 minute. Pick 1-2 questions of the following list:
+          </div>
+          <ul class="speaking-list">
+            <li *ngFor="let question of exercise.payload.payload.questions" class="speaking-question-item">
+              {{ question }}
+            </li>
+          </ul>
+        </div>
+      </div>
+
       <div *ngIf="exercise.payload.payload?.notes" class="speaking-notes">
         <mat-icon>info</mat-icon>
         <p>{{ exercise.payload.payload.notes }}</p>
