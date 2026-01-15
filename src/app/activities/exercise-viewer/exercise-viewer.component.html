@@ -103,7 +103,7 @@
     <!-- Speaking (forzar renderizado para depuración) -->
     <div *ngIf="isSpeaking() && exercise.payload" class="speaking-exercise">
       <!-- Part 1: Questions -->
-      <div *ngIf="exercise.payload.payload?.questions && exercise.payload.payload.questions.length > 0" class="speaking-questions styled-block">
+      <div *ngIf="exercise.payload.payload?.questions && exercise.payload.payload.questions.length > 0 && !exercise.payload.payload?.image" class="speaking-questions styled-block">
         <div class="speaking-header">
           <mat-icon color="primary" style="vertical-align: middle; margin-right: 8px;">record_voice_over</mat-icon>
           <h3>Speaking Questions</h3>
@@ -126,6 +126,26 @@
           <img [src]="'https://englishapps.app/img/speaking/' + level + '/' + exercise.payload.activity.id + '/' + exercise.payload.payload.image + '.jpeg'" alt="Speaking photo" class="speaking-photo-img" />
           <div class="speaking-photo-headline">{{ exercise.payload.payload.headline }}</div>
         </div>
+      </div>
+
+      <!-- Part 3: Paired Discussion -->
+      <div *ngIf="exercise.payload.payload?.image && exercise.payload.activity.part === 3 && exercise.payload.payload?.questions" class="speaking-paired-block styled-block">
+        <div class="speaking-header">
+          <mat-icon color="primary" style="vertical-align: middle; margin-right: 8px;">group</mat-icon>
+          <h3>Paired Discussion</h3>
+        </div>
+        <div class="speaking-paired-instruction">
+          You're going to talk about something together for about 2 minutes. This is the situation which you are required to talk about.
+        </div>
+        <div class="speaking-photo-content">
+          <img [src]="'https://englishapps.app/img/speaking/' + level + '/3/' + exercise.payload.payload.image + '.jpeg'" alt="Paired Discussion photo" class="speaking-photo-img" />
+        </div>
+        <ol class="speaking-list">
+          <li *ngFor="let question of exercise.payload.payload.questions" class="speaking-question-item">
+            <mat-icon color="accent" style="font-size:18px;vertical-align:middle;margin-right:6px;">help_outline</mat-icon>
+            <span>{{ question }}</span>
+          </li>
+        </ol>
       </div>
 
       <div *ngIf="exercise.payload.payload?.notes" class="speaking-notes">
