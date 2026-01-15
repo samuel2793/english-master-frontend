@@ -1,3 +1,102 @@
+  // Speaking C1 Part 2 - Images
+  .speaking-c1-images-block.styled-block {
+    background: #f8f9fa;
+    border-left: 4px solid #667eea;
+    border-radius: 12px;
+    padding: 24px 28px 20px 28px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.06);
+    transition: box-shadow 0.2s;
+    .speaking-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      .speaking-c1-images-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #3b3663;
+      }
+      .speaking-c1-images-level {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #667eea;
+        margin-left: 8px;
+      }
+    }
+    .speaking-c1-images-intro {
+      font-size: 1rem;
+      color: #444;
+      margin-bottom: 16px;
+    }
+    .speaking-c1-images-headline {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #2c3e50;
+      margin-bottom: 16px;
+    }
+    .speaking-c1-images-photo-content {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+      .speaking-photo-img {
+        max-width: 320px;
+        width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.10);
+        background: #e9e9f7;
+      }
+    }
+    .speaking-c1-images-question {
+      font-size: 1rem;
+      color: #3b3663;
+      margin-bottom: 8px;
+    }
+    .speaking-c1-images-counterpart {
+      font-size: 1rem;
+      color: #3b3663;
+      margin-bottom: 8px;
+    }
+  }
+    // Speaking C1 Part 3 - Bubbles Discussion
+    .speaking-c1-bubbles-block.styled-block {
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+      border-radius: 12px;
+      padding: 24px 28px 20px 28px;
+      margin-bottom: 32px;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.06);
+      transition: box-shadow 0.2s;
+      .speaking-header {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #667eea;
+        margin-bottom: 12px;
+      }
+      .speaking-c1-bubbles-headline {
+        font-size: 1.2rem;
+        font-weight: 500;
+        margin-bottom: 16px;
+        color: #2c3e50;
+      }
+      .speaking-c1-bubbles-photo-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 18px;
+        img {
+          max-width: 320px;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(102, 126, 234, 0.10);
+          margin-right: 24px;
+        }
+      }
+      .speaking-c1-bubbles-question {
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+        color: #444;
+      }
+    }
   // Speaking B2 Part 3 - Bubbles Discussion
   .speaking-b2-bubbles-block.styled-block {
     background: #f8f9fa;

@@ -197,6 +197,24 @@
         </div>
       </div>
 
+      <!-- Speaking C1 Part 2: Images -->
+        <!-- Speaking C1 Part 3: Bubbles Discussion -->
+        <div *ngIf="level === 'c1' && exercise.payload.activity.part === 3 && exercise.payload.payload?.image && exercise.payload.payload?.headline" class="speaking-c1-bubbles-block styled-block">
+          <div class="speaking-header">
+            <h3>Bubbles Discussion (C1 - Part 3)</h3>
+          </div>
+          <div class="speaking-c1-bubbles-photo-content">
+            <img class="speaking-image" [src]="'https://englishapps.app/img/speaking/c1/3/' + exercise.payload.payload.image + '.jpg'" alt="Bubbles Discussion" (error)="onImageError($event)" />
+          </div>
+          <div class="speaking-c1-bubbles-headline">
+            <p>{{ exercise.payload.payload.headline }}</p>
+          </div>
+          <div *ngIf="exercise.payload.payload.question" class="speaking-c1-bubbles-question">
+            <strong>Question:</strong>
+            <p>{{ exercise.payload.payload.question }}</p>
+          </div>
+        </div>
+
       <!-- Part 3: Paired Discussion -->
       <div *ngIf="exercise.payload.payload?.image && exercise.payload.activity.part === 3 && exercise.payload.payload?.questions" class="speaking-paired-block styled-block">
         <div class="speaking-header">
