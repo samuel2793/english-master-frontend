@@ -107,18 +107,23 @@
               <div class="speaking-header">
                 <mat-icon color="primary">bubble_chart</mat-icon>
                 <div>
-                  <div class="speaking-b2-bubbles-title">Part 3 - Bubbles Discussion</div>
+                  <div class="speaking-b2-bubbles-title">Part 3 - Bubbles</div>
                   <div class="speaking-b2-bubbles-level">B2</div>
                 </div>
               </div>
-              <div class="speaking-b2-bubbles-headline">
-                {{ exercise.payload.payload.headline }}
+              <div class="speaking-b2-bubbles-intro">
+                In part 3, you talk about something together for about two minutes and reach an agreement at the end.
               </div>
               <div class="speaking-b2-bubbles-photo-content">
                 <img [src]="'https://englishapps.app/img/speaking/b2/3/' + exercise.payload.payload.image + '.jpg'" alt="Bubbles Discussion" class="speaking-photo-img" />
               </div>
-              <div class="speaking-b2-bubbles-question" *ngIf="exercise.payload.payload.question">
-                <strong>Question:</strong> {{ exercise.payload.payload.question }}
+              <div class="speaking-b2-bubbles-task">
+                <div class="speaking-b2-bubbles-task-title">Task 1 (2 Minutes)</div>
+                <div class="speaking-b2-bubbles-headline">{{ exercise.payload.payload.headline }}</div>
+              </div>
+              <div class="speaking-b2-bubbles-task">
+                <div class="speaking-b2-bubbles-task-title">Task 2 (1 Minute)</div>
+                <div class="speaking-b2-bubbles-question"><strong>After the conversation, you are required to reach an agreement and answer the following question together.</strong><br>{{ exercise.payload.payload.question }}</div>
               </div>
             </div>
               <!-- Part 1: General Questions (Phase 1 + Phase 2) -->
