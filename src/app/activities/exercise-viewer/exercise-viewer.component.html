@@ -197,7 +197,28 @@
         </div>
       </div>
 
-      <!-- Speaking C1 Part 2: Images -->
+      <!-- Speaking C2 Part 3: Long Turn -->
+      <div *ngIf="level === 'c2' && exercise.payload.activity.part === 3 && exercise.payload.payload?.question" class="speaking-c2-longturn-block styled-block">
+        <div class="speaking-header">
+          <mat-icon color="primary">record_voice_over</mat-icon>
+          <div>
+            <div class="speaking-c2-longturn-title">Part 3 - Long Turn</div>
+            <div class="speaking-c2-longturn-level">C2</div>
+          </div>
+        </div>
+        <div class="speaking-c2-longturn-question">
+          <strong>Question:</strong> {{ exercise.payload.payload.question }}
+        </div>
+        <div *ngIf="exercise.payload.payload.points && exercise.payload.payload.points.length > 0" class="speaking-c2-longturn-points">
+          <strong>Points to consider:</strong>
+          <ul>
+            <li *ngFor="let point of exercise.payload.payload.points">{{ point }}</li>
+          </ul>
+        </div>
+        <div *ngIf="exercise.payload.payload.counterpart_question" class="speaking-c2-longturn-counterpart">
+          <strong>Counterpart question:</strong> {{ exercise.payload.payload.counterpart_question }}
+        </div>
+      </div>
               <!-- Speaking C2 Part 2: Images Discussion -->
               <div *ngIf="level === 'c2' && exercise.payload.activity.part === 2 && exercise.payload.payload?.image && (exercise.payload.payload?.task_1 || exercise.payload.payload?.task_2)" class="speaking-c2-images-block styled-block">
                 <div class="speaking-header">
