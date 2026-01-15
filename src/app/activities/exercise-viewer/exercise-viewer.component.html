@@ -100,28 +100,23 @@
       </div>
     </div>
 
-    <!-- Speaking -->
+    <!-- Speaking (forzar renderizado para depuración) -->
     <div *ngIf="isSpeaking() && exercise.payload" class="speaking-exercise">
-      <div *ngIf="exercise.payload.image" class="speaking-image">
-        <img
-          [src]="getSpeakingImageUrl(exercise.payload.image)"
-          [alt]="'Speaking exercise image ' + exercise.payload.image"
-          (error)="onImageError($event)"
-        />
-      </div>
-
-      <div class="speaking-questions">
-        <h3>Questions:</h3>
-        <ol>
-          <li *ngFor="let question of exercise.payload.questions">
-            {{ question }}
+      <div *ngIf="exercise.payload.payload?.questions && exercise.payload.payload.questions.length > 0" class="speaking-questions styled-block">
+        <div class="speaking-header">
+          <mat-icon color="primary" style="vertical-align: middle; margin-right: 8px;">record_voice_over</mat-icon>
+          <h3>Speaking Questions</h3>
+        </div>
+        <ol class="speaking-list">
+          <li *ngFor="let question of exercise.payload.payload.questions" class="speaking-question-item">
+            <mat-icon color="accent" style="font-size:18px;vertical-align:middle;margin-right:6px;">help_outline</mat-icon>
+            <span>{{ question }}</span>
           </li>
         </ol>
       </div>
-
-      <div *ngIf="exercise.payload.notes" class="speaking-notes">
+      <div *ngIf="exercise.payload.payload?.notes" class="speaking-notes">
         <mat-icon>info</mat-icon>
-        <p>{{ exercise.payload.notes }}</p>
+        <p>{{ exercise.payload.payload.notes }}</p>
       </div>
     </div>
 
