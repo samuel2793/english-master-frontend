@@ -6,6 +6,7 @@ import { HomeComponent } from './home/home.component';
 import { AuthGuard } from './guards/auth.guard';
 import { AdminGuard } from './guards/admin.guard';
 import { AdminPanelComponent } from './admin/admin-panel/admin-panel.component';
+import { UserLogComponent } from './admin/user-log/user-log.component';
 import { ActivityBrowserComponent } from './activities/activity-browser/activity-browser.component';
 import { ExerciseListComponent } from './activities/exercise-list/exercise-list.component';
 import { ExerciseViewerComponent } from './activities/exercise-viewer/exercise-viewer.component';
@@ -22,6 +23,11 @@ const routes: Routes = [
     path: 'admin',
     component: AdminPanelComponent,
     canActivate: [AuthGuard, AdminGuard]  // Solo admins autenticados
+  },
+  {
+    path: 'admin/users/:uid/log',
+    component: UserLogComponent,
+    canActivate: [AuthGuard, AdminGuard]
   },
   {
     path: 'activities/:course',

@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AdminService, AdminUser, EnglishLevelStatus } from '../../services/admin.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-admin-panel',
@@ -14,8 +13,7 @@ export class AdminPanelComponent implements OnInit {
 
   constructor(
     private adminService: AdminService,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {

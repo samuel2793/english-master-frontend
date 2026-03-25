@@ -3,8 +3,10 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { ActivitiesService } from '../../services/activities.service';
 import { AuthService } from '../../services/auth.service';
+import { AdminService } from '../../services/admin.service';
 import {
   CourseType,
   LevelType,
@@ -43,6 +45,7 @@ export class ExerciseViewerComponent implements OnInit {
     private router: Router,
     private activitiesService: ActivitiesService,
     private authService: AuthService,
+    private adminService: AdminService,
     private cdr: ChangeDetectorRef
     , private sanitizer: DomSanitizer
   ) {}
@@ -81,34 +84,20 @@ export class ExerciseViewerComponent implements OnInit {
         })
       );
 
-    this.exercise$.subscribe((exercise) => {
+    this.exercise$.pipe(take(1)).subscribe((exercise) => {
       this.loading = false;
+      if (exercise) {
+        this.registerExerciseAccess(exercise);
+      }
 
       // Cachear si tiene missing gaps para evitar múltiples llamadas desde el template
       this.hasMissingGapsCache = exercise?.payload?.text ? this.hasMissingGaps(exercise.payload.text) : false;
-
-      // DEBUGGING: Detectar tipo de ejercicio
-      console.log('🎯 EXERCISE TYPE DETECTION:', {
-        course: exercise?.course,
-        activity: exercise?.activity,
-        hasText: !!exercise?.payload?.text,
-        hasTexts: !!exercise?.payload?.texts,
-        hasAudio: !!exercise?.payload?.audio,
-        hasQuestions: !!exercise?.payload?.questions,
-        hasChoices: !!exercise?.payload?.choices,
-        hasCompactChoices: !!exercise?.payload?.compact_choices,
-        hasCompactSolutions: !!exercise?.payload?.compact_solutions,
-        hasSolutions: !!exercise?.payload?.solutions,
-        hasMissingGapsCache: this.hasMissingGapsCache,
-        detectedType: this.detectExerciseType(exercise)
-      });
 
       // Aleatorizar opciones para Missing Paragraphs/Sentences
       if (exercise?.payload?.choices && Array.isArray(exercise.payload.choices)) {
         // Convert keys to strings before shuffling to keep key types consistent
         const normalizedChoices = exercise.payload.choices.map((c: any) => ({ ...c, key: c.key !== undefined && c.key !== null ? c.key.toString() : c.key }));
         this.shuffledChoices = this.shuffleAndRelabelChoices([...normalizedChoices]);
-        console.log('✅ Shuffled choices (array):', this.shuffledChoices);
       } else if (exercise?.payload?.compact_choices) {
         // Si tiene compact_choices, convertirlo a array
         const choicesArray = Object.entries(exercise.payload.compact_choices).map(([key, value]) => ({
@@ -117,7 +106,6 @@ export class ExerciseViewerComponent implements OnInit {
           displayKey: key.toUpperCase()
         }));
         this.shuffledChoices = this.shuffleAndRelabelChoices(choicesArray);
-        console.log('✅ Shuffled choices (from compact_choices):', this.shuffledChoices);
       }
       // Aleatorizar respuestas para Long Text
       if (exercise?.payload?.compact_answers) {
@@ -130,6 +118,27 @@ export class ExerciseViewerComponent implements OnInit {
 
       // Forzar detección de cambios
       this.cdr.detectChanges();
+    });
+  }
+
+  private registerExerciseAccess(exercise: Exercise): void {
+    const user = this.authService.currentUser;
+    if (!user) return;
+
+    this.adminService.registerUserExerciseAccess({
+      uid: user.uid,
+      email: user.email,
+      username: user.username,
+      course: exercise.course,
+      level: exercise.level,
+      activity: exercise.activity,
+      exerciseId: exercise.id,
+      exerciseTitle: exercise.payload?.title || this.getExerciseDisplayTitle(exercise),
+      relpath: exercise.relpath
+    }).subscribe({
+      error: (error) => {
+        console.error('Error al registrar acceso al ejercicio:', error);
+      }
     });
   }
 

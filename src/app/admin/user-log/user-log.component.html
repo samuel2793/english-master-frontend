@@ -1,0 +1,49 @@
+<div class="user-log-container">
+  <div class="user-log-header">
+    <div>
+      <h1>
+        <mat-icon>history</mat-icon>
+        Log de usuario
+      </h1>
+      <p *ngIf="user">
+        {{ user.username }} · {{ user.email }}
+      </p>
+    </div>
+
+    <button mat-raised-button color="primary" routerLink="/admin">
+      <mat-icon>arrow_back</mat-icon>
+      Volver al panel
+    </button>
+  </div>
+
+  <mat-card *ngIf="loading" class="state-card">
+    <mat-icon>hourglass_top</mat-icon>
+    <p>Cargando log...</p>
+  </mat-card>
+
+  <mat-card *ngIf="!loading && logs.length === 0" class="state-card">
+    <mat-icon>playlist_remove</mat-icon>
+    <p>Este usuario no tiene accesos registrados por ahora</p>
+  </mat-card>
+
+  <div class="logs-list" *ngIf="!loading && logs.length > 0">
+    <mat-card *ngFor="let log of logs" class="log-card">
+      <mat-card-content>
+        <div class="log-main-row">
+          <h3>{{ log.exerciseTitle || ('Ejercicio ' + log.exerciseId) }}</h3>
+          <div class="log-date">
+            <mat-icon>schedule</mat-icon>
+            <span>{{ formatDateTime(log.accessedAt) }}</span>
+          </div>
+        </div>
+
+        <div class="log-details">
+          <div><strong>Curso:</strong> {{ formatText(log.course) }}</div>
+          <div><strong>Nivel:</strong> {{ log.level?.toUpperCase() }}</div>
+          <div><strong>Actividad:</strong> {{ formatText(log.activity) }}</div>
+          <div><strong>ID ejercicio:</strong> {{ log.exerciseId }}</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

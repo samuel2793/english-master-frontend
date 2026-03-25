@@ -36,6 +36,7 @@ import { AdminPanelComponent } from './admin/admin-panel/admin-panel.component';
 import { ActivityBrowserComponent } from './activities/activity-browser/activity-browser.component';
 import { ExerciseListComponent } from './activities/exercise-list/exercise-list.component';
 import { ExerciseViewerComponent } from './activities/exercise-viewer/exercise-viewer.component';
+import { UserLogComponent } from './admin/user-log/user-log.component';
 
 @NgModule({
   declarations: [
@@ -45,6 +46,7 @@ import { ExerciseViewerComponent } from './activities/exercise-viewer/exercise-v
     HeaderComponent,
     HomeComponent,
     AdminPanelComponent,
+    UserLogComponent,
     ActivityBrowserComponent,
     ExerciseListComponent,
     ExerciseViewerComponent
